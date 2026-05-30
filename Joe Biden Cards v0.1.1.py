@@ -3,7 +3,8 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import Command
 from aiogram.types import FSInputFile, message
 from aiogram.enums import ParseMode
-
+from dotenv import load_dotenv
+import os
 import random
 import sqlite3
 import time
@@ -13,7 +14,15 @@ waiting_users = set()
 leaderboard_selection_users = set()
 CD = 900
 
-bot = Bot(token="", default=DefaultBotProperties(parse_mode=ParseMode.HTML),)
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+load_dotenv(os.path.join(base_dir, "data.env"))
+
+token = os.getenv("BOT_TOKEN")
+db_name = os.getenv("DATABASE_v0.1.1").strip()
+dev_id = os.getenv("DEV_ID")
+
+bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML),)
 dp = Dispatcher()
 
 card_names = {
@@ -23,7 +32,7 @@ card_names = {
     4: "Обычный Джо Байден",
 }
 
-db = sqlite3.connect("")
+db = sqlite3.connect(os.path.join(base_dir, db_name))
 cursor = db.cursor()
 
 cursor.execute("""
@@ -137,11 +146,29 @@ def get_world_card_count(card_id: int) -> int:
 
 @dp.message(Command("broadcast"))
 async def broadcast(message: types.Message):
-    if message.from_user.id != 7020510390:
+    if message.from_user.id != dev_id:
         return
 
-    if message.from_user.id == 7020510390:
-        text = ""
+    if message.from_user.id == dev_id:
+        text = (
+         "<b>ОБНОВА v0.1.1 ВЫШЛА</b>\n\n"
+         "Новое:\n"
+         "<blockquote>- Изменение лидерборда: добавлена система опыта, полученное количество которой зависит от выбитой карточки, чем реже карточка - тем больше опыта. Сортировка лидерборда по трем категориям: по опыту, коллекции (сколько видов карт у вас открыто) и по первенству (игроки которые получили первыми определенные карточки.)\n"
+         "- Напоминания о завершении КД и неактивности.\n"
+         "- Уведомления при выполнении разных достижений, например получении первым конкретной карточки или открытии полной коллекции.\n"
+         "- Уникальные описания для карточек.</blockquote>\n\n"
+         "Баги:\n"
+         "<blockquote>- Пофикшен баг при котором шансы распределялись неправильно. На Сикс Севен Джо Байдена шанс был больше чем на обычного и остальные карточки выпадали с высшим шансом чем должны были.\n"
+         "- Пофикшены небольшие ошибки в тексте и форматировании.</blockquote>\n\n"
+         "Баланс:\n"
+         "<blockquote>- КД уменьшен до 15 минут (30m > 15m)\n"
+         "- Изменения в редкости карточек (Водолаз 2% > 5%; Сикс Севен 20% > 10%; Праздничный 8% > 30%; Обычный 70% > 55%)</blockquote>\n\n"
+         "QoL:\n"
+         "<blockquote>- Изменен дизайн Водолаза Джо Байдена.\n"
+         "- По многочисленным просьбам игроков Сикс Севен Джо Байден теперь имеет редкость которую раньше имел Праздничный Джо Байден.\n"
+         "- В лидерборде теперь отображаются ники а не юзернеймы.</blockquote>\n\n"
+         "Также в виде компенсации за обнуленное количество карточек и в честь триумфа голоса игроков всем доступен x1 Сикс Севен Джо Байден и x30 XP. Для получения введите команду /claim ."
+        )
         await message.answer("🚀 Рассылка запущена..")
 
         cursor.execute("SELECT user_id FROM users")
@@ -471,7 +498,7 @@ async def handle_all_messages(message: types.Message):
                         )
                         db.commit()
 
-                    photo = FSInputFile("ВодолазДжоБайден.jpg")
+                    photo = FSInputFile(os.path.join(base_dir, "ВодолазДжоБайден.jpg"))
                     text = (
                         "Вам выпал..\n"
                         "- <b>Водолаз Джо Байден - 5%!</b>\n"
@@ -527,7 +554,7 @@ async def handle_all_messages(message: types.Message):
                         )
                         db.commit()
 
-                    photo = FSInputFile("67ДжоБайден.jpg")
+                    photo = FSInputFile(os.path.join(base_dir, "67ДжоБайден.jpg"))
                     text = (
                         "Вам выпал..\n"
                         "- <b>Сикс Севен Джо Байден - 10%!</b>\n"
@@ -583,7 +610,7 @@ async def handle_all_messages(message: types.Message):
                         )
                         db.commit()
 
-                    photo = FSInputFile("ПраздничныйДжоБайден.jpg")
+                    photo = FSInputFile(os.path.join(base_dir, "ПраздничныйДжоБайден.jpg"))
                     text = (
                         "Вам выпал..\n"
                         "- <b>Праздничный Джо Байден - 30%!</b>\n"
@@ -640,7 +667,7 @@ async def handle_all_messages(message: types.Message):
                         )
                         db.commit()
 
-                    photo = FSInputFile("ОбычныйДжоБайден.jpg")
+                    photo = FSInputFile(os.path.join(base_dir, "ОбычныйДжоБайден.jpg"))
                     text = (
                         "Вам выпал..\n"
                         "- <b>Обычный Джо Байден - 55%!</b>\n"

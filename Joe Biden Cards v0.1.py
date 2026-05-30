@@ -3,17 +3,28 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import Command
 from aiogram.types import FSInputFile, message
 from aiogram.enums import ParseMode
+from dotenv import load_dotenv
+import os
 import random
 import sqlite3
 import time
 import asyncio
+
 waiting_users = set()
 CD = 1800
 
-bot = Bot(token="", default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+load_dotenv(os.path.join(base_dir, "data.env"))
+
+token = os.getenv("BOT_TOKEN")
+db_name = os.getenv("DATABASE_v0.1").strip()
+dev_id = os.getenv("DEV_ID")
+
+bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
 
-db = sqlite3.connect("")
+db = sqlite3.connect(os.path.join(base_dir, db_name))
 cursor = db.cursor()
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS users (
@@ -147,7 +158,7 @@ async def handle_all_messages(message: types.Message):
     chance = random.randint(1, 100)
     if chance <= 3:
      add_card(message.from_user.id, 1)
-     photo = FSInputFile("ВодолазДжоБайден.jpg")
+     photo = FSInputFile(os.path.join(base_dir, "ВодолазДжоБайден.jpg"))
      text = (
      "Вам выпал..\n"
      "- <b>Водолаз Джо Байден - 3%!</b>\n\n"
@@ -162,7 +173,7 @@ async def handle_all_messages(message: types.Message):
      waiting_users.remove(user_id)
     elif chance <= 10:
      add_card(message.from_user.id, 2)
-     photo = FSInputFile("ПраздничныйДжоБайден.jpg")
+     photo = FSInputFile(os.path.join(base_dir, "ПраздничныйДжоБайден.jpg"))
      text = (
      "Вам выпал..\n" \
      "- <b>Праздничный Джо Байден - 7%!</b>\n\n"
@@ -177,7 +188,7 @@ async def handle_all_messages(message: types.Message):
      waiting_users.remove(user_id)
     elif chance <= 30:
      add_card(message.from_user.id, 3)
-     photo = FSInputFile("67ДжоБайден.jpg")
+     photo = FSInputFile(os.path.join(base_dir, "67ДжоБайден.jpg"))
      text = (
      "Вам выпал..\n"
      "- <b>Сиксевен Джо Байден - 20%!</b>\n\n"
@@ -192,7 +203,7 @@ async def handle_all_messages(message: types.Message):
      waiting_users.remove(user_id)
     else:
      add_card(message.from_user.id, 4)
-     photo = FSInputFile("ОбычныйДжоБайден.jpg")
+     photo = FSInputFile(os.path.join(base_dir, "ОбычныйДжоБайден.jpg"))
      text = (
       "Вам выпал..\n"
       "- <b>Обычный Джо Байден - 70%!</b>\n\n"

@@ -3,16 +3,27 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import Command
 from aiogram.types import FSInputFile, message
 from aiogram.enums import ParseMode
+from dotenv import load_dotenv
+import os
 import random
 import sqlite3
 import time
 import asyncio
+
 waiting_users = set()
 ver_selection_users = set()
 leaderboard_selection_users = set()
 CD = 900
 
-bot = Bot(token="", default=DefaultBotProperties(parse_mode=ParseMode.HTML),)
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+load_dotenv(os.path.join(base_dir, "data.env"))
+
+token = os.getenv("BOT_TOKEN")
+db_name = os.getenv("DATABASE_v0.1.1.1").strip()
+dev_id = os.getenv("DEV_ID")
+
+bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML),)
 dp = Dispatcher()
 
 card_names = {
@@ -22,7 +33,7 @@ card_names = {
  4: "Обычный Джо Байден"
 }
 
-db = sqlite3.connect("")
+db = sqlite3.connect(os.path.join(base_dir, db_name))
 cursor = db.cursor()
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS users (
@@ -109,10 +120,10 @@ def get_world_card_count(card_id: int) -> int:
 
 @dp.message(Command("broadcast"))
 async def broadcast(message: types.Message):
- if message.from_user.id != "":
+ if message.from_user.id != dev_id:
   return
- if message.from_user.id == "":
-  text = ""
+ if message.from_user.id == dev_id:
+  text = "Максим ты пидорас <3"
   cursor.execute("SELECT user_id FROM users")
   rows = cursor.fetchall()
   count = 0
@@ -366,7 +377,7 @@ async def handle_all_messages(message: types.Message):
      if get_user_card_count(user_id, 1) == 1:
       cursor.execute("UPDATE users SET unlocked_cards = unlocked_cards + 1 WHERE user_id = ?", (user_id,))
       db.commit()
-     photo = FSInputFile("ВодолазДжоБайден.jpg")
+     photo = FSInputFile(os.path.join(base_dir, "ВодолазДжоБайден.jpg"))
      text = (
      "Вам выпал..\n"
      "- <b>Водолаз Джо Байден - 5%!</b>\n"
@@ -398,7 +409,7 @@ async def handle_all_messages(message: types.Message):
      if get_user_card_count(user_id, 2) == 1:
       cursor.execute("UPDATE users SET unlocked_cards = unlocked_cards + 1 WHERE user_id = ?", (user_id,))
       db.commit()
-     photo = FSInputFile("67ДжоБайден.jpg")
+     photo = FSInputFile(os.path.join(base_dir, "67ДжоБайден.jpg"))
      text = (
      "Вам выпал..\n" \
      "- <b>Сикс Севен Джо Байден - 10%!</b>\n"
@@ -430,7 +441,7 @@ async def handle_all_messages(message: types.Message):
      if get_user_card_count(user_id, 3) == 1:
       cursor.execute("UPDATE users SET unlocked_cards = unlocked_cards + 1 WHERE user_id = ?", (user_id,))
       db.commit()
-     photo = FSInputFile("ПраздничныйДжоБайден.jpg")
+     photo = FSInputFile(os.path.join(base_dir, "ПраздничныйДжоБайден.jpg"))
      text = (
      "Вам выпал..\n"
      "- <b>Праздничный Джо Байден - 30%!</b>\n"
@@ -463,7 +474,7 @@ async def handle_all_messages(message: types.Message):
      if get_user_card_count(user_id, 4) == 1:
       cursor.execute("UPDATE users SET unlocked_cards = unlocked_cards + 1 WHERE user_id = ?", (user_id,))
       db.commit()
-     photo = FSInputFile("ОбычныйДжоБайден.jpg")
+     photo = FSInputFile(os.path.join(base_dir, "ОбычныйДжоБайден.jpg"))
      text = (
       "Вам выпал..\n"
       "- <b>Обычный Джо Байден - 55%!</b>\n"
