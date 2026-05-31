@@ -498,7 +498,7 @@ async def handle_all_messages(message: types.Message):
                         )
                         db.commit()
 
-                    photo = FSInputFile(os.path.join(base_dir, "ВодолазДжоБайден.jpg"))
+                    photo = FSInputFile(os.path.join(base_dir, "images", "ВодолазДжоБайден.jpg"))
                     text = (
                         "Вам выпал..\n"
                         "- <b>Водолаз Джо Байден - 5%!</b>\n"
@@ -522,7 +522,6 @@ async def handle_all_messages(message: types.Message):
                             "Вы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard ."
                         )
                         await message.answer(text)
-
                         xp_to_add = 40
                         cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
                         db.commit()
@@ -534,15 +533,10 @@ async def handle_all_messages(message: types.Message):
                             "Вы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard ."
                         )
                         xp_to_add = 125
-
-                    cursor.execute(
-                        "UPDATE users SET xp = xp + ? WHERE user_id = ?",
-                        (xp_to_add, user_id),
-                    )
-                    db.commit()
-                    await message.answer(text)
-                    waiting_users.remove(user_id)
-
+                        await message.answer(text)
+                        xp_to_add = 125
+                        cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
+                        db.commit()
                 elif chance <= 15:  # 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
                     xp_to_add = 15
                     add_card(user_id, 2, xp_to_add, nickname)
@@ -554,7 +548,7 @@ async def handle_all_messages(message: types.Message):
                         )
                         db.commit()
 
-                    photo = FSInputFile(os.path.join(base_dir, "67ДжоБайден.jpg"))
+                    photo = FSInputFile(os.path.join(base_dir, "images", "67ДжоБайден.jpg"))
                     text = (
                         "Вам выпал..\n"
                         "- <b>Сикс Севен Джо Байден - 10%!</b>\n"
@@ -578,7 +572,6 @@ async def handle_all_messages(message: types.Message):
                             "Вы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard"
                         )
                         await message.answer(text)
-
                         xp_to_add = 15
                         cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
                         db.commit()
@@ -590,14 +583,10 @@ async def handle_all_messages(message: types.Message):
                             "Вы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard ."
                         )
                         xp_to_add = 125
-
-                    cursor.execute(
-                        "UPDATE users SET xp = xp + ? WHERE user_id = ?",
-                        (xp_to_add, user_id),
-                    )
-                    db.commit()
-                    await message.answer(text)
-                    waiting_users.remove(user_id)
+                        await message.answer(text)
+                        xp_to_add = 125
+                        cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
+                        db.commit()
 
                 elif chance <= 45:  # 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45
                     xp_to_add = 6
@@ -610,7 +599,7 @@ async def handle_all_messages(message: types.Message):
                         )
                         db.commit()
 
-                    photo = FSInputFile(os.path.join(base_dir, "ПраздничныйДжоБайден.jpg"))
+                    photo = FSInputFile(os.path.join(base_dir, "images", "ПраздничныйДжоБайден.jpg"))
                     text = (
                         "Вам выпал..\n"
                         "- <b>Праздничный Джо Байден - 30%!</b>\n"
@@ -634,7 +623,6 @@ async def handle_all_messages(message: types.Message):
                             "Вы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard"
                         )
                         await message.answer(text)
-
                         xp_to_add = 6
                         cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
                         db.commit()
@@ -645,16 +633,10 @@ async def handle_all_messages(message: types.Message):
                             " +125 XP\n\n"
                             "Вы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard ."
                         )
+                        await message.answer(text)
                         xp_to_add = 125
-
-                    cursor.execute(
-                        "UPDATE users SET xp = xp + ? WHERE user_id = ?",
-                        (xp_to_add, user_id),
-                    )
-                    db.commit()
-                    await message.answer(text)
-                    new_time = time.time()
-                    waiting_users.remove(user_id)
+                        cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
+                        db.commit()
 
                 else:  # 55-100
                     xp_to_add = 2
@@ -667,7 +649,7 @@ async def handle_all_messages(message: types.Message):
                         )
                         db.commit()
 
-                    photo = FSInputFile(os.path.join(base_dir, "ОбычныйДжоБайден.jpg"))
+                    photo = FSInputFile(os.path.join(base_dir, "images", "ОбычныйДжоБайден.jpg"))
                     text = (
                         "Вам выпал..\n"
                         "- <b>Обычный Джо Байден - 55%!</b>\n"
@@ -691,7 +673,6 @@ async def handle_all_messages(message: types.Message):
                             "Вы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard"
                         )
                         await message.answer(text)
-
                         xp_to_add = 2
                         cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
                         db.commit()
@@ -702,14 +683,10 @@ async def handle_all_messages(message: types.Message):
                             " +125 XP\n\n"
                             "Вы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard ."
                         )
+                        await message.answer(text)
                         xp_to_add = 125
-
-                    cursor.execute(
-                        "UPDATE users SET xp = xp + ? WHERE user_id = ?",
-                        (xp_to_add, user_id),
-                    )
-                    db.commit()
-                    await message.answer(text)
+                        cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
+                        db.commit()
 
                 new_time = time.time()
                 waiting_users.discard(user_id)

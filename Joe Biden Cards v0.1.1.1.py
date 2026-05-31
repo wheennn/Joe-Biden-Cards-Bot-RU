@@ -244,10 +244,10 @@ async def change_of_leaderoard_mode(message: types.Message):
    results += "Режим: По опыту | По коллекции | <b>По первенству</b>\n\n"
    for i, user in enumerate(users, 1):
     results += f" {user[1]} - открыл <b>{card_names[user[0]]}</b> первым в мире\n"
-    cursor.execute("SELECT SUM(total_count) FROM card_stats")
-    row = cursor.fetchone()
-    results += f"\nВсего карточек существует: {row[0] if row and row[0] else 0}\n\n"
-    await message.answer(results)
+   cursor.execute("SELECT SUM(total_count) FROM card_stats")
+   row = cursor.fetchone()
+   results += f"\nВсего карточек существует: {row[0] if row and row[0] else 0}\n\n"
+   await message.answer(results)
 
   elif answer == "по коллекции":
    cursor.execute("SELECT full_name, unlocked_cards FROM users ORDER BY unlocked_cards DESC LIMIT 10")
@@ -377,7 +377,7 @@ async def handle_all_messages(message: types.Message):
      if get_user_card_count(user_id, 1) == 1:
       cursor.execute("UPDATE users SET unlocked_cards = unlocked_cards + 1 WHERE user_id = ?", (user_id,))
       db.commit()
-     photo = FSInputFile(os.path.join(base_dir, "ВодолазДжоБайден.jpg"))
+     photo = FSInputFile(os.path.join(base_dir, "images", "ВодолазДжоБайден.jpg"))
      text = (
      "Вам выпал..\n"
      "- <b>Водолаз Джо Байден - 5%!</b>\n"
@@ -409,7 +409,7 @@ async def handle_all_messages(message: types.Message):
      if get_user_card_count(user_id, 2) == 1:
       cursor.execute("UPDATE users SET unlocked_cards = unlocked_cards + 1 WHERE user_id = ?", (user_id,))
       db.commit()
-     photo = FSInputFile(os.path.join(base_dir, "67ДжоБайден.jpg"))
+     photo = FSInputFile(os.path.join(base_dir, "images", "67ДжоБайден.jpg"))
      text = (
      "Вам выпал..\n" \
      "- <b>Сикс Севен Джо Байден - 10%!</b>\n"
@@ -441,7 +441,7 @@ async def handle_all_messages(message: types.Message):
      if get_user_card_count(user_id, 3) == 1:
       cursor.execute("UPDATE users SET unlocked_cards = unlocked_cards + 1 WHERE user_id = ?", (user_id,))
       db.commit()
-     photo = FSInputFile(os.path.join(base_dir, "ПраздничныйДжоБайден.jpg"))
+     photo = FSInputFile(os.path.join(base_dir, "images", "ПраздничныйДжоБайден.jpg"))
      text = (
      "Вам выпал..\n"
      "- <b>Праздничный Джо Байден - 30%!</b>\n"
@@ -474,7 +474,7 @@ async def handle_all_messages(message: types.Message):
      if get_user_card_count(user_id, 4) == 1:
       cursor.execute("UPDATE users SET unlocked_cards = unlocked_cards + 1 WHERE user_id = ?", (user_id,))
       db.commit()
-     photo = FSInputFile(os.path.join(base_dir, "ОбычныйДжоБайден.jpg"))
+     photo = FSInputFile(os.path.join(base_dir, "images", "ОбычныйДжоБайден.jpg"))
      text = (
       "Вам выпал..\n"
       "- <b>Обычный Джо Байден - 55%!</b>\n"
