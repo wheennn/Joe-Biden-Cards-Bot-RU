@@ -144,12 +144,12 @@ async def broadcast(message: types.Message):
 cursor.execute("SELECT full_name FROM users WHERE user_id = 5126101865")
 row = cursor.fetchone()
 if row and row[0] == "Anon":
- cursor.execute("UPDATE users SET full_name = Die in your dream. #998 WHERE user_id = 5126101865")
+ cursor.execute("UPDATE users SET full_name = 'Die in your dream. #998' WHERE user_id = 5126101865")
  db.commit()
 cursor.execute("SELECT full_name FROM users WHERE user_id = 6277608655")
 row = cursor.fetchone()
 if row and row[0] == "Anon":
- cursor.execute("UPDATE users SET full_name = Victony Universal WHERE user_id = 6277608655")
+ cursor.execute("UPDATE users SET full_name = 'Victony Universal' WHERE user_id = 6277608655")
  db.commit()
 
 @dp.message(Command("claim"))
