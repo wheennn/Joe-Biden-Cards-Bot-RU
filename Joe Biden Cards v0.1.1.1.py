@@ -123,7 +123,11 @@ async def broadcast(message: types.Message):
  if message.from_user.id != dev_id:
   return
  if message.from_user.id == dev_id:
-  text = "Максим ты пидорас <3"
+  text = ( 
+   "<b>Бот стал доступен на GitHub</b>!\n\n"
+   "https://github.com/wheennn/Joe-Biden-Cards-Bot-RU\n\n"
+   "Также теперь работа бота <b>возобновлена</b> благодаря тому, что с этого момента он находится на сервере @Subarash_ii "
+  )
   cursor.execute("SELECT user_id FROM users")
   rows = cursor.fetchall()
   count = 0
@@ -137,6 +141,16 @@ async def broadcast(message: types.Message):
     print(f"Ошибка при отправке {user_id}: {e}")
   await message.answer(f"✅ Рассылка завершена! Сообщение получили {count} пользователей.")
    
+cursor.execute("SELECT full_name FROM users WHERE user_id = 5126101865")
+row = cursor.fetchone()
+if row and row[0] == "Anon":
+ cursor.execute("UPDATE users SET full_name = Die in your dream. #998 WHERE user_id = 5126101865")
+ db.commit()
+cursor.execute("SELECT full_name FROM users WHERE user_id = 6277608655")
+row = cursor.fetchone()
+if row and row[0] == "Anon":
+ cursor.execute("UPDATE users SET full_name = Victony Universal WHERE user_id = 6277608655")
+ db.commit()
 
 @dp.message(Command("claim"))
 async def gift_claiming(message: types.Message):
@@ -147,7 +161,7 @@ async def gift_claiming(message: types.Message):
  )
  cursor.execute("SELECT count FROM user_cards WHERE user_id = ? AND card_id = 2", (user_id,))
  row = cursor.fetchone()
- if time.time() >= 0:
+ if time.time() >= 1780309500:
   text = "⏱️ Срок получения подарка истек. Его действие закончилось 2 мая в 00:00."
   await message.answer(text)
  else:
@@ -159,7 +173,7 @@ async def gift_claiming(message: types.Message):
     INSERT INTO user_cards (user_id, card_id, count)
     SELECT user_id, 2, 1 FROM users WHERE user_id = ?
    """, (user_id,))
-   text = "🎁 Вы успешно получили <b>x30 опыта</b> и <b>x1 Сикс Севен Джо Байден</b> в честь ивента!"
+   text = "🎁 Вы успешно получили <b>x30 опыта</b> и <b>x1 Сикс Севен Джо Байден</b> в честь выхода v0.1.1.1!"
    db.commit()
    await message.answer(text)
   else:
@@ -243,7 +257,12 @@ async def change_of_leaderoard_mode(message: types.Message):
    results = "<b>🏆 ЛИДЕРБОРД</b>\n"
    results += "Режим: По опыту | По коллекции | <b>По первенству</b>\n\n"
    for i, user in enumerate(users, 1):
-    results += f" {user[1]} - открыл <b>{card_names[user[0]]}</b> первым в мире\n"
+    results += (
+     "cwendyzz - открыл <b>Водолаз Джо Байден</b> первым в мире"
+     "cwendyzz - открыл <b>Сикс Севен Джо Байден</b> первым в мире"
+     "cwendyzz - открыл <b>Праздничный Джо Байден</b> первым в мире"
+     "cwendyzz - открыл <b>Обычный Джо Байден</b> первым в мире"
+    )
    cursor.execute("SELECT SUM(total_count) FROM card_stats")
    row = cursor.fetchone()
    results += f"\nВсего карточек существует: {row[0] if row and row[0] else 0}\n\n"
@@ -256,6 +275,10 @@ async def change_of_leaderoard_mode(message: types.Message):
    results += "Режим: По опыту | <b>По коллекции</b> | По первенству\n\n"
    rank = 1
    for user in users:
+    if user[0] == "Wheen17":
+     continue
+    if user[0] == "whenn?🍂":
+     continue
     medal = "👑" if rank == 1 else f"{rank}"
     results += f"{medal}. {user[0]} - открыто {user[1]}/4 карт\n"
     rank += 1
@@ -273,6 +296,10 @@ async def change_of_leaderoard_mode(message: types.Message):
    results += "Режим: <b>По опыту</b> | По коллекции | По первенству\n\n"
    rank = 1
    for user in users:
+    if user[0] == "Wheen17":
+     continue
+    if user[0] == "whenn?🍂":
+     continue
     medal = "👑" if rank == 1 else f"{rank}"
     results += f"{medal}. {user[0]} - {user[1]} XP\n"
     rank += 1
