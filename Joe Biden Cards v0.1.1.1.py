@@ -122,24 +122,23 @@ def get_world_card_count(card_id: int) -> int:
 async def broadcast(message: types.Message):
  if message.from_user.id != dev_id:
   return
- if message.from_user.id == dev_id:
-  text = ( 
-   "<b>Бот стал доступен на GitHub</b>!\n\n"
-   "https://github.com/wheennn/Joe-Biden-Cards-Bot-RU\n\n"
-   "Также теперь работа бота <b>возобновлена</b> благодаря тому, что с этого момента он находится на сервере @Subarash_ii "
-  )
-  cursor.execute("SELECT user_id FROM users")
-  rows = cursor.fetchall()
-  count = 0
-  for row in rows:
-   user_id = row[0]
-   try:
-    await bot.send_message(chat_id=user_id, text=text)
-    count += 1
-    await asyncio.sleep(0.05)
-   except Exception as e:
-    print(f"Ошибка при отправке {user_id}: {e}")
-  await message.answer(f"✅ Рассылка завершена! Сообщение получили {count} пользователей.")
+ text = ( 
+  "<b>Бот стал доступен на GitHub</b>!\n\n"
+  "https://github.com/wheennn/Joe-Biden-Cards-Bot-RU\n\n"
+  "Также теперь работа бота <b>возобновлена</b> благодаря тому, что с этого момента он находится на сервере @Subarash_ii "
+ )
+ cursor.execute("SELECT user_id FROM users")
+ rows = cursor.fetchall()
+ count = 0
+ for row in rows:
+  user_id = row[0]
+  try:
+   await message.bot.send_message(chat_id=user_id, text=text)
+   count += 1
+   await asyncio.sleep(0.1) 
+  except Exception as e:
+   print(f"Ошибка при отправке {user_id}: {e}")
+ await message.answer(f"✅ Рассылка завершена! Сообщение получили {count} пользователей.")
    
 cursor.execute("SELECT full_name FROM users WHERE user_id = 5126101865")
 row = cursor.fetchone()
