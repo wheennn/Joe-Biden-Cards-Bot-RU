@@ -4,4 +4,5 @@ services:
     container_name: "joe_biden"
     env_file: data.env
     restart: always
-    
+    volumes:
+      - ./database:/app/database
