@@ -21,7 +21,7 @@ load_dotenv(os.path.join(base_dir, "data.env"))
 
 token = os.getenv("BOT_TOKEN")
 db_name = os.getenv("DATABASE_v0.1.1.1").strip()
-dev_id = os.getenv("DEV_ID")
+dev_id = int(os.getenv("DEV_ID"))
 
 bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML),)
 dp = Dispatcher()
@@ -130,6 +130,7 @@ async def broadcast(message: types.Message):
  cursor.execute("SELECT user_id FROM users")
  rows = cursor.fetchall()
  count = 0
+ await message.answer("🚀 Рассылка запущена..")
  for row in rows:
   user_id = row[0]
   try:
@@ -160,7 +161,7 @@ async def gift_claiming(message: types.Message):
  )
  cursor.execute("SELECT count FROM user_cards WHERE user_id = ? AND card_id = 2", (user_id,))
  row = cursor.fetchone()
- if time.time() >= 1780309500:
+ if time.time() >= 1780318800:
   text = "⏱️ Срок получения подарка истек. Его действие закончилось 2 мая в 00:00."
   await message.answer(text)
  else:
