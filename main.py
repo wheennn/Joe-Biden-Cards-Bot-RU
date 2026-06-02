@@ -146,7 +146,14 @@ async def showing_db_info(message: types.Message):
  row = cursor.fetchone()
  total_xp = row[0] if row else 0
  text += f"<b>В общем: {total_count} карт | {total_xp} XP</b>"
- await message.answer(text)
+ print(text)
+ if len(text) >= 800:
+  part1 = text[:800]
+  part2 = text[800:]
+  await message.answer(part1)
+  await message.answer(part2)
+ else:
+  await message.answer(text)
   
 
 @dp.message(Command("broadcast"))  # АДМИН КОМАНДА v0.1.1+
