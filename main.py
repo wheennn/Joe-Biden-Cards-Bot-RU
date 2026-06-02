@@ -109,48 +109,43 @@ async def showing_db_info(message: types.Message):
   return
  cursor.execute("SELECT user_id FROM users")
  ids = [rows[0] for rows in cursor.fetchall()]
- text = "<b>ВСЯ ИНФОРМАЦИЯ</b>\n\n"
+ text = "<b>ВСЯ ИНФОРМАЦИЯ</b>\n"
  for id in ids:
-  cursor.execute("SELECT full_name FROM users WHERE user_id = ?", (id,))
+  cursor.execute("SELECT full_name, xp,  total_cards, unlocked_cards FROM users WHERE user_id = ?", (id,))
   row = cursor.fetchone()
-  full_name = row[0] if row else 0
-  cursor.execute("SELECT xp FROM users WHERE user_id = ?", (id,))
-  row = cursor.fetchone()
-  xp = row[0] if row else 0
-  text += f"<b>{full_name} – {id} | {xp}</b>\n"
-  cursor.execute("SELECT card_id FROM user_cards")
-  card_ids = [rows[0] for rows in cursor.fetchall()]
-  for card_id in card_ids:
-   cursor.execute("SELECT count FROM user_cards WHERE card_id = ? AND user_id = ?", (card_id, id))
-   row = cursor.fetchone()
-   count = row[0] if row else 0
-   text += f"{card_names[card_id]} — x{count}\n"
-  cursor.execute("SELECT total_cards FROM users WHERE user_id = ?", (id,))
-  row = cursor.fetchone()
-  total_cards = row[0] if row else 0
-  cursor.execute("SELECT unlocked_cards FROM users WHERE user_id = ?", (id,))
-  row = cursor.fetchone()
-  unlocked_cards = row[0] if row else 0
-  text += f"В общем: {total_cards} карт | Открыто: {unlocked_cards}\n\n"
+  full_name, xp, total_cards, unlocked_cards = row if row else ("Anon", 0, 0, 0)
+  text += f"\n<b>{full_name} – {id} | {xp} XP</b>\n"
+  cursor.execute("SELECT card_id, count FROM user_cards WHERE user_id = ?", (id,))
+  user_cards = cursor.fetchall()
+  for card_id, count in user_cards:
+   card_name = card_names.get(card_id, f"Карта не найдена")
+   text += f"{card_name} — x{count}\n"
+  text += f"В общем: {total_cards} карт | Открыто: {unlocked_cards}/4 карт\n"
   if id == 2041528836:
    text += (
-    "Первый в мире <b>Водолаз Джо Байден</b>\n"
+    "\nПервый в мире <b>Водолаз Джо Байден</b>\n"
     "Первый в мире <b>Сикс Севен Джо Байден</b>\n"
     "Первый в мире <b>Праздничный Джо Байден</b>\n"
     "Первый в мире <b>Обычный Джо Байден</b>\n\n"
    )
  cursor.execute("SELECT SUM(total_count) FROM card_stats")
  row = cursor.fetchone()
- total_count = row[0] if row else 0
+ total_count = row[0] if row and row[0] is not None else 0
+ cursor.execute("SELECT SUM(total_cards) FROM users WHERE user_id IN (7020510390, 7481475946)")
+ row = cursor.fetchone()
+ when_total_count = row[0] if row and row[0] is not None else 0
  cursor.execute("SELECT SUM(xp) FROM users")
  row = cursor.fetchone()
- total_xp = row[0] if row else 0
- text += f"<b>В общем: {total_count} карт | {total_xp} XP</b>"
- print(text)
- if len(text) >= 800:
-  part1 = text[:800]
-  part2 = text[800:]
+ total_xp = row[0] if row and row[0] is not None else 0
+ cursor.execute("SELECT SUM(xp) FROM users WHERE user_id IN (7020510390, 7481475946)")
+ row = cursor.fetchone()
+ when_total_xp = row[0] if row and row[0] is not None else 0
+ text += f"\n<b>В общем: {total_count - when_total_count} ({total_count}) карт | {total_xp - when_total_xp} ({total_xp}) XP</b>"
+ if len(text) >= 4096:
+  part1 = text[:4096].replace("<b>", "").replace("</b>", "")
+  part2 = text[4096:].replace("<b>", "").replace("</b>", "")
   await message.answer(part1)
+  await asyncio.sleep(2)
   await message.answer(part2)
  else:
   await message.answer(text)
@@ -460,9 +455,13 @@ async def handle_all_messages(message: types.Message):
    current_left = CD - int(time.time() - last_opening_time)
    if current_left <= 0:
     chance = random.randint(1, 100)
+    devs_cards = 0
     if chance <= 5: # 1, 2, 3, 4, 5
      xp_to_add = 40
      add_card(user_id, 1, xp_to_add, nickname)
+     cursor.execute("SELECT SUM(count) FROM user_cards WHERE user_id IN (7020510390, 7481475946) AND card_id = 1")
+     row = cursor.fetchone()
+     devs_cards = row[0] if row and row[0] is not None else 0
      if get_user_card_count(user_id, 1) == 1:
       cursor.execute("UPDATE users SET unlocked_cards = unlocked_cards + 1 WHERE user_id = ?", (user_id,))
       db.commit()
@@ -473,7 +472,7 @@ async def handle_all_messages(message: types.Message):
      "+40 XP\n\n"
      "<blockquote>— нырнул в разговор и не вынырнул. Говорит много, звучит умно, смысл утонул где-то на глубине.</blockquote>\n\n"
      f"Количество: {get_user_card_count(message.from_user.id, 1)}\n"
-     f"Всего в мире: {get_world_card_count(1)}\n\n"
+     f"Всего в мире: {get_world_card_count(1) - devs_cards}\n\n"
      "Для просмотра вашей обновленной коллекции нажмите /menu"
      )
      await message.answer_photo(photo=photo, caption=text)
@@ -495,6 +494,9 @@ async def handle_all_messages(message: types.Message):
     elif chance <= 15: # 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
      xp_to_add = 15
      add_card(user_id, 2, xp_to_add, nickname)
+     cursor.execute("SELECT SUM(count) FROM user_cards WHERE user_id IN (7020510390, 7481475946) AND card_id = 2")
+     row = cursor.fetchone()
+     devs_cards = row[0] if row and row[0] is not None else 0
      if get_user_card_count(user_id, 2) == 1:
       cursor.execute("UPDATE users SET unlocked_cards = unlocked_cards + 1 WHERE user_id = ?", (user_id,))
       db.commit()
@@ -505,7 +507,7 @@ async def handle_all_messages(message: types.Message):
      "+15 XP\n\n"
      "<blockquote>— 67 67 67. Никто не знает что это значит, но если не уважаешь 67 — ты вне цивилизации.</blockquote>\n\n"
      f"Количество: {get_user_card_count(message.from_user.id, 2)}\n"
-     f"Всего в мире: {get_world_card_count(2)}\n\n"
+     f"Всего в мире: {get_world_card_count(2) - devs_cards}\n\n"
      "Для просмотра вашей обновленной коллекции нажмите /menu"
      )
      await message.answer_photo(photo=photo, caption=text)
@@ -527,6 +529,9 @@ async def handle_all_messages(message: types.Message):
     elif chance <= 45: # 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45
      xp_to_add = 6
      add_card(user_id, 3, xp_to_add, nickname)
+     cursor.execute("SELECT SUM(count) FROM user_cards WHERE user_id IN (7020510390, 7481475946) AND card_id = 3")
+     row = cursor.fetchone()
+     devs_cards = row[0] if row and row[0] is not None else 0
      if get_user_card_count(user_id, 3) == 1:
       cursor.execute("UPDATE users SET unlocked_cards = unlocked_cards + 1 WHERE user_id = ?", (user_id,))
       db.commit()
@@ -537,7 +542,7 @@ async def handle_all_messages(message: types.Message):
      "+6 XP\n\n"
      "<blockquote>— это когда торт уже не торт, а государственное событие.</blockquote>\n\n"
      f"Количество: {get_user_card_count(message.from_user.id, 3)}\n"
-     f"Всего в мире: {get_world_card_count(3)}\n\n"
+     f"Всего в мире: {get_world_card_count(3) - devs_cards}\n\n"
      "Для просмотра вашей обновленной коллекции нажмите /menu"
      )
      await message.answer_photo(photo=photo, caption=text)
@@ -559,6 +564,9 @@ async def handle_all_messages(message: types.Message):
     else: # 55-100
      xp_to_add = 2
      add_card(user_id, 4, xp_to_add, nickname)
+     cursor.execute("SELECT SUM(count) FROM user_cards WHERE user_id IN (7020510390, 7481475946) AND card_id = 4")
+     row = cursor.fetchone()
+     devs_cards = row[0] if row and row[0] is not None else 0
      if get_user_card_count(user_id, 4) == 1:
       cursor.execute("UPDATE users SET unlocked_cards = unlocked_cards + 1 WHERE user_id = ?", (user_id,))
       db.commit()
@@ -569,7 +577,7 @@ async def handle_all_messages(message: types.Message):
       "+2 XP\n\n"
       "<blockquote>— literally дефолт скин. Ничего не делает, просто стоит, но почему-то уже происходит лор. Если выпал — значит игра сказала “ну держи хоть что-то”.</blockquote>\n\n"
       f"Количество: {get_user_card_count(message.from_user.id, 4)}\n"
-      f"Всего в мире: {get_world_card_count(4)}\n\n"
+      f"Всего в мире: {get_world_card_count(4) - devs_cards}\n\n"
       "Для просмотра вашей обновленной коллекции нажмите /menu"
      )
      await message.answer_photo(photo=photo, caption=text)
