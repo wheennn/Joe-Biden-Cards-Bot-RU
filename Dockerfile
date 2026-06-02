@@ -8,4 +8,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["python", "Joe Biden Cards v0.1.1.1.py"]
+CMD ["python", "main.py"]
