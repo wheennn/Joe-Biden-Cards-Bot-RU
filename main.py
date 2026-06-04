@@ -316,7 +316,6 @@ async def change_of_leaderoard_mode(message: types.Message):
   elif answer in ["по коллекции", "пк"]:
    cursor.execute("SELECT full_name, unlocked_cards FROM users ORDER BY unlocked_cards DESC LIMIT 10")
    users = cursor.fetchall()
-   user[0] = html.quote(user[0])
    results = "<b>🏆 ЛИДЕРБОРД</b>\n"
    results += "Режим: По опыту | <b>По коллекции</b> | По первенству\n\n"
    rank = 1
@@ -326,7 +325,7 @@ async def change_of_leaderoard_mode(message: types.Message):
     if user[0] == "whenn?🍂":
      continue
     medal = "👑" if rank == 1 else f"{rank}"
-    results += f"{medal}. {user[0]} - открыто {user[1]}/4 карт\n"
+    results += f"{medal}. {html.quote(user[0])} - открыто {user[1]}/4 карт\n"
     rank += 1
    cursor.execute("SELECT SUM(total_count) FROM card_stats")
    row = cursor.fetchone()
@@ -349,14 +348,13 @@ async def change_of_leaderoard_mode(message: types.Message):
    results = "<b>🏆 ЛИДЕРБОРД</b>\n"
    results += "Режим: <b>По опыту</b> | По коллекции | По первенству\n\n"
    rank = 1
-   user[0] = html.quote(user[0])
    for user in users:
     if user[0] == "Wheen17":
      continue
     if user[0] == "whenn?🍂":
      continue
     medal = "👑" if rank == 1 else f"{rank}"
-    results += f"{medal}. {user[0]} - {user[1]} XP\n"
+    results += f"{medal}. {html.quote(user[0])} - {user[1]} XP\n"
     rank += 1
    cursor.execute("SELECT SUM(total_count) FROM card_stats")
    row = cursor.fetchone()
