@@ -1,4 +1,4 @@
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher, types, html
 from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import Command
 from aiogram.types import FSInputFile, message
@@ -114,6 +114,7 @@ async def showing_db_info(message: types.Message):
   cursor.execute("SELECT full_name, xp,  total_cards, unlocked_cards FROM users WHERE user_id = ?", (id,))
   row = cursor.fetchone()
   full_name, xp, total_cards, unlocked_cards = row if row else ("Anon", 0, 0, 0)
+  full_name = html.quote(full_name)
   text += f"\n<b>{full_name} – {id} | {xp} XP</b>\n"
   cursor.execute("SELECT card_id, count FROM user_cards WHERE user_id = ?", (id,))
   user_cards = cursor.fetchall()
@@ -149,21 +150,6 @@ async def showing_db_info(message: types.Message):
   await message.answer(part2)
  else:
   await message.answer(text)
-
-if int(time.time()) in range(1780577400, 1780578600):
- cursor.execute("DELETE FROM user_cards WHERE user_id = 6776823399")
- cursor.execute("DELETE FROM users WHERE user_id = 6776823399")
- db.commit()
- time.sleep(5)
- cursor.execute("""
-  INSERT INTO users (user_id, full_name, xp, total_cards, unlocked_cards) 
-  VALUES (6776823399, '𔓕 ⊹ ◜⛩️◞  ꩜ すばらしい ꩜ ◜🪽◞ `⌁', 402, 37, 4)
- """)
- cursor.execute("INSERT INTO user_cards (user_id, card_id, count) VALUES (6776823399, 1, 3)")
- cursor.execute("INSERT INTO user_cards (user_id, card_id, count) VALUES (6776823399, 2, 2)")
- cursor.execute("INSERT INTO user_cards (user_id, card_id, count) VALUES (6776823399, 3, 12)")
- cursor.execute("INSERT INTO user_cards (user_id, card_id, count) VALUES (6776823399, 4, 20)")
- db.commit()
 
 @dp.message(Command("broadcast"))  # АДМИН КОМАНДА v0.1.1+
 async def broadcast(message: types.Message):
@@ -330,6 +316,7 @@ async def change_of_leaderoard_mode(message: types.Message):
   elif answer in ["по коллекции", "пк"]:
    cursor.execute("SELECT full_name, unlocked_cards FROM users ORDER BY unlocked_cards DESC LIMIT 10")
    users = cursor.fetchall()
+   user[0] = html.quote(user[0])
    results = "<b>🏆 ЛИДЕРБОРД</b>\n"
    results += "Режим: По опыту | <b>По коллекции</b> | По первенству\n\n"
    rank = 1
@@ -362,6 +349,7 @@ async def change_of_leaderoard_mode(message: types.Message):
    results = "<b>🏆 ЛИДЕРБОРД</b>\n"
    results += "Режим: <b>По опыту</b> | По коллекции | По первенству\n\n"
    rank = 1
+   user[0] = html.quote(user[0])
    for user in users:
     if user[0] == "Wheen17":
      continue
@@ -400,6 +388,7 @@ async def start_handler(message: types.Message):
 @dp.message(Command("menu")) # КОМАНДА МЕНЮ v0.1+
 async def handle_answer(message: types.Message):
  nickname = message.from_user.full_name
+ nickname = html.quote(nickname)
  user_id = message.from_user.id
  cursor.execute("SELECT total_cards, last_card_time FROM users WHERE user_id = ?", (user_id,))
  row = cursor.fetchone()
