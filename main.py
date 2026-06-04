@@ -320,7 +320,7 @@ async def change_of_leaderoard_mode(message: types.Message):
    results += "Режим: По опыту | <b>По коллекции</b> | По первенству\n\n"
    rank = 1
    for user in users:
-    if user[0] == "Wheen17":
+    if user[0] == "wheen. <3":
      continue
     if user[0] == "whenn?🍂":
      continue
@@ -349,7 +349,7 @@ async def change_of_leaderoard_mode(message: types.Message):
    results += "Режим: <b>По опыту</b> | По коллекции | По первенству\n\n"
    rank = 1
    for user in users:
-    if user[0] == "Wheen17":
+    if user[0] == "wheen. <3":
      continue
     if user[0] == "whenn?🍂":
      continue
