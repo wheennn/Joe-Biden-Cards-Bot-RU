@@ -149,7 +149,21 @@ async def showing_db_info(message: types.Message):
   await message.answer(part2)
  else:
   await message.answer(text)
-  
+
+if int(time.time()) in range(1780577400, 1780578600):
+ cursor.execute("DELETE FROM user_cards WHERE user_id = 6776823399")
+ cursor.execute("DELETE FROM users WHERE user_id = 6776823399")
+ db.commit()
+ time.sleep(5)
+ cursor.execute("""
+  INSERT INTO users (user_id, full_name, xp, total_cards, unlocked_cards) 
+  VALUES (6776823399, '𔓕 ⊹ ◜⛩️◞  ꩜ すばらしい ꩜ ◜🪽◞ `⌁', 402, 37, 4)
+ """)
+ cursor.execute("INSERT INTO user_cards (user_id, card_id, count) VALUES (6776823399, 1, 3)")
+ cursor.execute("INSERT INTO user_cards (user_id, card_id, count) VALUES (6776823399, 2, 2)")
+ cursor.execute("INSERT INTO user_cards (user_id, card_id, count) VALUES (6776823399, 3, 12)")
+ cursor.execute("INSERT INTO user_cards (user_id, card_id, count) VALUES (6776823399, 4, 20)")
+ db.commit()
 
 @dp.message(Command("broadcast"))  # АДМИН КОМАНДА v0.1.1+
 async def broadcast(message: types.Message):
