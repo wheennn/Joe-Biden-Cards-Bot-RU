@@ -663,33 +663,33 @@ async def opening_through_cd(callback: CallbackQuery):
      f"<blockquote>{card_descriptions.get(i, "")}</blockquote>\n\n"
      f"Количество: {get_user_card_count(user_id, i)}\n"
      f"Всего в мире: {get_world_card_count(i) - devs_cards}\n\n"
-     "Для просмотра вашей обновленной коллекции нажмите /menu"
+     "Для просмотра вашей обновлённой коллекции нажмите /menu"
     )
     await callback.message.answer_photo(photo=photo, caption=text)
     cursor.execute("SELECT unlocked_cards FROM users WHERE user_id = ?", (user_id,))
     count_after = cursor.fetchone()[0]
     if get_world_card_count(i) == 1:
-     text = f"Вы первыми в мире открыли карту <b>{card_names.get(i, "")}</b>!\n+{card_xps.get(i, "")} XP\n\nВы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard"
+     text = f"Вы первыми в мире открыли карту <b>{card_names.get(i, "")}</b>!\n+{card_xps.get(i, "")} XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard"
      await callback.message.answer(text)
      xp_to_add = card_xps.get(i, 0)
      cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
      db.commit()
     if count_after == 5 and count_before == 4:
      if user_id in full_coll_users:
-      text = f"Вы собрали полную коллекцию Джо Байденов!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n +125 XP\n\nВы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard\n\nПоскольку вы достигли данного показателя и получили опыт за него еще раньше, ваша текущая награда была уменьшена."
+      text = f"Вы собрали полную коллекцию Джо Байденов!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n +125 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard\n\nПоскольку вы достигли данного показателя и получили опыт за него еще раньше, ваша текущая награда была уменьшена."
       xp_to_add = 125
      else:
-      text = f"Вы собрали полную коллекцию Джо Байденов!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n +250 XP\n\nВы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard"
+      text = f"Вы собрали полную коллекцию Джо Байденов!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n +250 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard"
       xp_to_add = 250
      cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
      db.commit()
      await callback.message.answer(text)
     elif count_after == 6 and count_before == 5:
      if user_id in full_coll_users:
-      text = f"Вы собрали абсолютно полную коллекцию Джо Байденов включая эксклюзивы!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n+125 XP\n\nВы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard\n\nПоскольку вы достигли данного показателя и получили опыт за него еще раньше, ваша текущая награда была уменьшена."
+      text = f"Вы собрали абсолютно полную коллекцию Джо Байденов включая эксклюзивы!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n+125 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard\n\nПоскольку вы достигли данного показателя и получили опыт за него еще раньше, ваша текущая награда была уменьшена."
       xp_to_add = 125
      else:
-      text = f"Вы собрали абсолютно полную коллекцию Джо Байденов включая эксклюзивы!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n+250 XP\n\nВы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard"
+      text = f"Вы собрали абсолютно полную коллекцию Джо Байденов включая эксклюзивы!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n+250 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard"
       xp_to_add = 250
      cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
      db.commit()
@@ -739,33 +739,33 @@ async def opening_through_fpacks(callback: CallbackQuery):
     f"<blockquote>{card_descriptions.get(i, "")}</blockquote>\n\n"
     f"Количество: {get_user_card_count(user_id, i)}\n"
     f"Всего в мире: {get_world_card_count(i) - devs_cards}\n\n"
-    "Для просмотра вашей обновленной коллекции нажмите /menu"
+    "Для просмотра вашей обновлённой коллекции нажмите /menu"
    )
    await callback.message.answer_photo(photo=photo, caption=text)
    cursor.execute("SELECT unlocked_cards FROM users WHERE user_id = ?", (user_id,))
    count_after = cursor.fetchone()[0]
    if get_world_card_count(i) == 1:
-    text = f"Вы первыми в мире открыли карту <b>{card_names.get(i, "")}</b>!\n+{card_xps.get(i, "")} XP\n\nВы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard"
+    text = f"Вы первыми в мире открыли карту <b>{card_names.get(i, "")}</b>!\n+{card_xps.get(i, "")} XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard"
     await callback.message.answer(text)
     xp_to_add = card_xps.get(i, 0)
     cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
     db.commit()
    if count_after == 5 and count_before == 4:
     if user_id in full_coll_users:
-     text = f"Вы собрали полную коллекцию Джо Байденов!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n +125 XP\n\nВы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard\n\nПоскольку вы достигли данного показателя и получили опыт за него еще раньше, ваша текущая награда была уменьшена."
+     text = f"Вы собрали полную коллекцию Джо Байденов!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n +125 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard\n\nПоскольку вы достигли данного показателя и получили опыт за него еще раньше, ваша текущая награда была уменьшена."
      xp_to_add = 125
     else:
-     text = f"Вы собрали полную коллекцию Джо Байденов!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n +250 XP\n\nВы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard"
+     text = f"Вы собрали полную коллекцию Джо Байденов!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n +250 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard"
      xp_to_add = 250
     cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
     db.commit()
     await callback.message.answer(text)
    elif count_after == 6 and count_before == 5:
     if user_id in full_coll_users:
-     text = f"Вы собрали абсолютно полную коллекцию Джо Байденов включая эксклюзивы!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n+125 XP\n\nВы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard\n\nПоскольку вы достигли данного показателя и получили опыт за него еще раньше, ваша текущая награда была уменьшена."
+     text = f"Вы собрали абсолютно полную коллекцию Джо Байденов включая эксклюзивы!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n+125 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard\n\nПоскольку вы достигли данного показателя и получили опыт за него еще раньше, ваша текущая награда была уменьшена."
      xp_to_add = 125
     else:
-     text = f"Вы собрали абсолютно полную коллекцию Джо Байденов включая эксклюзивы!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n+250 XP\n\nВы можете просмотреть обновленный лидерборд с вашим ником используя /leaderboard"
+     text = f"Вы собрали абсолютно полную коллекцию Джо Байденов включая эксклюзивы!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n+250 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard"
      xp_to_add = 250
     cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
     db.commit()
