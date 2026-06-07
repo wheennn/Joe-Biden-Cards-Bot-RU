@@ -179,6 +179,27 @@ try:
 except sqlite3.OperationalError:
  print("Столбец 'fpacks' уже добавлен.")
 
+cursor.execute("SELECT xp FROM users WHERE user_id = 1364160996")
+row = cursor.fetchone()
+xp = row[0] if row else 0
+if xp > 1500:
+   cursor.execute("UPDATE users SET xp = 275 WHERE user_id = 1364160996")
+   db.commit()
+   cursor.execute("""
+     UPDATE count 
+     SET count = CASE card_id
+        WHEN 5 THEN 1
+        WHEN 1 THEN 0
+        WHEN 2 THEN 5
+        WHEN 3 THEN 4
+        WHEN 4 THEN 18
+     END
+     WHERE card_id IN (1, 2, 3, 4, 5) AND user_id = 1364160996
+   """)
+   db.commit()
+   text = "Вы первыми в мире открыли карту <b>Сигма Джо Байден</b>!\n+100 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard\n\nНесмотря на это, весь ваш опыт и карты получённые с помощью бага были аннулированы. Мы благодарим вас за такую быструю находку уязвимости в системе и надеемся на взаимопонимание." 
+   await bot.send_message(chat_id=1364160996, text=text)
+
 async def season_calculations(): # ДИСПЕТЧЕР СЕЗОНОВ v0.1.2+
  global season, season_start, season_end, season_desc, season_duration
  season = 0
@@ -711,71 +732,78 @@ async def opening_through_cd(callback: CallbackQuery):
 @dp.callback_query(F.data == "opening_through_fpacks")
 async def opening_through_fpacks(callback: CallbackQuery):
  user_id = callback.from_user.id
- nickname = escape(callback.from_user.full_name)
- cursor.execute("SELECT unlocked_cards FROM users WHERE user_id = ?", (user_id,))
- count_before = cursor.fetchone()[0]
- cursor.execute("SELECT last_card_time FROM users WHERE user_id = ?", (user_id,))
+ cursor.execute("SELECT fpacks FROM users WHERE user_id = ?", (user_id,))
  row = cursor.fetchone()
- prev_time = row[0] if row else 0
- chance = random.randint(1, 100)
- devs_cards = 0
- for i in card_drop_diapazones.keys():
-  if chance <= card_drop_diapazones.get(i):
-   xp_to_add = card_xps.get(i, 0)
-   add_card(user_id, i, xp_to_add, nickname)
-   if get_user_card_count(user_id, i) == 1:
-    cursor.execute("UPDATE users SET unlocked_cards = unlocked_cards + 1 WHERE user_id = ?", (user_id,))
-    db.commit()
-   cursor.execute("SELECT SUM(count) FROM user_cards WHERE user_id IN (7020510390, 7481475946) AND card_id = ?", (i,))
-   row = cursor.fetchone()
-   devs_cards = row[0] if row and row[0] is not None else 0
-   actual_card_name = card_names.get(i, "").replace(" ", "")
-   actual_card_name += ".jpg"
-   photo = FSInputFile(os.path.join(base_dir, "images", actual_card_name))
-   text = (
-     "Вам выпал..\n"
-    f"<b>{card_names.get(i, "")} — {card_chances.get(i, "")}%!</b>\n"
-    f"+{card_xps.get(i, "")} XP\n\n"
-    f"<blockquote>{card_descriptions.get(i, "")}</blockquote>\n\n"
-    f"Количество: {get_user_card_count(user_id, i)}\n"
-    f"Всего в мире: {get_world_card_count(i) - devs_cards}\n\n"
-    "Для просмотра вашей обновлённой коллекции нажмите /menu"
-   )
-   await callback.message.answer_photo(photo=photo, caption=text)
-   cursor.execute("SELECT unlocked_cards FROM users WHERE user_id = ?", (user_id,))
-   count_after = cursor.fetchone()[0]
-   if get_world_card_count(i) == 1:
-    text = f"Вы первыми в мире открыли карту <b>{card_names.get(i, "")}</b>!\n+{card_xps.get(i, "")} XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard"
-    await callback.message.answer(text)
+ fpacks = row[0] if row else 0
+ if fpacks > 0:
+  cursor.execute("UPDATE users SET fpacks = fpacks - 1 WHERE user_id = ?", (user_id,))
+  db.commit()
+  nickname = escape(callback.from_user.full_name)
+  cursor.execute("SELECT unlocked_cards FROM users WHERE user_id = ?", (user_id,))
+  count_before = cursor.fetchone()[0]
+  cursor.execute("SELECT last_card_time FROM users WHERE user_id = ?", (user_id,))
+  row = cursor.fetchone()
+  prev_time = row[0] if row else 0
+  chance = random.randint(1, 100)
+  devs_cards = 0
+  for i in card_drop_diapazones.keys():
+   if chance <= card_drop_diapazones.get(i):
     xp_to_add = card_xps.get(i, 0)
-    cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
+    add_card(user_id, i, xp_to_add, nickname)
+    if get_user_card_count(user_id, i) == 1:
+     cursor.execute("UPDATE users SET unlocked_cards = unlocked_cards + 1 WHERE user_id = ?", (user_id,))
+     db.commit()
+    cursor.execute("SELECT SUM(count) FROM user_cards WHERE user_id IN (7020510390, 7481475946) AND card_id = ?", (i,))
+    row = cursor.fetchone()
+    devs_cards = row[0] if row and row[0] is not None else 0
+    actual_card_name = card_names.get(i, "").replace(" ", "")
+    actual_card_name += ".jpg"
+    photo = FSInputFile(os.path.join(base_dir, "images", actual_card_name))
+    text = (
+      "Вам выпал..\n"
+     f"<b>{card_names.get(i, "")} — {card_chances.get(i, "")}%!</b>\n"
+     f"+{card_xps.get(i, "")} XP\n\n"
+     f"<blockquote>{card_descriptions.get(i, "")}</blockquote>\n\n"
+     f"Количество: {get_user_card_count(user_id, i)}\n"
+     f"Всего в мире: {get_world_card_count(i) - devs_cards}\n\n"
+     "Для просмотра вашей обновлённой коллекции нажмите /menu"
+    )
+    await callback.message.answer_photo(photo=photo, caption=text)
+    cursor.execute("SELECT unlocked_cards FROM users WHERE user_id = ?", (user_id,))
+    count_after = cursor.fetchone()[0]
+    if get_world_card_count(i) == 1:
+     text = f"Вы первыми в мире открыли карту <b>{card_names.get(i, "")}</b>!\n+{card_xps.get(i, "")} XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard"
+     await callback.message.answer(text)
+     xp_to_add = card_xps.get(i, 0)
+     cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
+     db.commit()
+    if count_after == 5 and count_before == 4:
+     if user_id in full_coll_users:
+      text = f"Вы собрали полную коллекцию Джо Байденов!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n +125 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard\n\nПоскольку вы достигли данного показателя и получили опыт за него еще раньше, ваша текущая награда была уменьшена."
+      xp_to_add = 125
+     else:
+      text = f"Вы собрали полную коллекцию Джо Байденов!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n +250 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard"
+      xp_to_add = 250
+     cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
+     db.commit()
+     await callback.message.answer(text)
+    elif count_after == 6 and count_before == 5:
+     if user_id in full_coll_users:
+      text = f"Вы собрали абсолютно полную коллекцию Джо Байденов включая эксклюзивы!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n+125 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard\n\nПоскольку вы достигли данного показателя и получили опыт за него еще раньше, ваша текущая награда была уменьшена."
+      xp_to_add = 125
+     else:
+      text = f"Вы собрали абсолютно полную коллекцию Джо Байденов включая эксклюзивы!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n+250 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard"
+      xp_to_add = 250
+     cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
+     db.commit()
+     await callback.message.answer(text)
+    await callback.answer()
+    cursor.execute("UPDATE users SET last_card_time = ? WHERE user_id = ?", (prev_time, user_id))
     db.commit()
-   if count_after == 5 and count_before == 4:
-    if user_id in full_coll_users:
-     text = f"Вы собрали полную коллекцию Джо Байденов!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n +125 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard\n\nПоскольку вы достигли данного показателя и получили опыт за него еще раньше, ваша текущая награда была уменьшена."
-     xp_to_add = 125
-    else:
-     text = f"Вы собрали полную коллекцию Джо Байденов!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n +250 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard"
-     xp_to_add = 250
-    cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
-    db.commit()
-    await callback.message.answer(text)
-   elif count_after == 6 and count_before == 5:
-    if user_id in full_coll_users:
-     text = f"Вы собрали абсолютно полную коллекцию Джо Байденов включая эксклюзивы!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n+125 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard\n\nПоскольку вы достигли данного показателя и получили опыт за него еще раньше, ваша текущая награда была уменьшена."
-     xp_to_add = 125
-    else:
-     text = f"Вы собрали абсолютно полную коллекцию Джо Байденов включая эксклюзивы!\nПоследней нужной картой стал <b>{card_names.get(i, "")}</b>.\n+250 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard"
-     xp_to_add = 250
-    cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (xp_to_add, user_id))
-    db.commit()
-    await callback.message.answer(text)
-   await callback.answer()
-   cursor.execute("UPDATE users SET last_card_time = ? WHERE user_id = ?", (prev_time, user_id))
-   db.commit()
-   cursor.execute("UPDATE users SET fpacks = fpacks - 1 WHERE user_id = ?", (user_id,))
-   db.commit()
-   break
+    break
+ else:
+  text = "Недостаточно наборов карт. Попробуйте позже."
+  await callback.message.answer(text)
 
 @dp.callback_query(F.data == "next_pack")
 async def next_pack(callback: CallbackQuery):
