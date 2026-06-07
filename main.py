@@ -624,7 +624,7 @@ async def opening(callback: CallbackQuery):
   seconds = current_left % 60
   card_pack_opening_selection.button(text=f"Бесплатно ({minutes}m {seconds}s)", callback_data="opening_through_cd")
  elif current_left <= 0:
-  card_pack_opening_selection.button(text="Бесплатно (0m 0s)", callback_data="opening_through_cd")
+  card_pack_opening_selection.button(text="Бесплатно", callback_data="opening_through_cd")
  if fpacks > 0:
   card_pack_opening_selection.button(text=f"Открыть из запасов ({fpacks} шт.)", callback_data="opening_through_fpacks")
  card_pack_opening_selection.adjust(1)
