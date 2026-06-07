@@ -179,28 +179,31 @@ try:
 except sqlite3.OperationalError:
  print("Столбец 'fpacks' уже добавлен.")
 
-cursor.execute("SELECT xp FROM users WHERE user_id = 1364160996")
-row = cursor.fetchone()
-xp = row[0] if row else 0
-if xp > 1500:
-   cursor.execute("UPDATE users SET xp = 275 WHERE user_id = 1364160996")
-   db.commit()
-   cursor.execute("""
-     UPDATE user_cards 
-     SET count = CASE card_id
-        WHEN 5 THEN 1
-        WHEN 1 THEN 0
-        WHEN 2 THEN 5
-        WHEN 3 THEN 4
-        WHEN 4 THEN 18
-     END
-     WHERE card_id IN (1, 2, 3, 4, 5) AND user_id = 1364160996
-   """)
-   db.commit()
-   cursor.execute("UPDATE card_stats SET first_unlocked = 'Mᴇ Cʀᴀꜰᴛ♡' WHERE card_id = 5")
-   db.commit()
-   text = "Вы первыми в мире открыли карту <b>Сигма Джо Байден</b>!\n+100 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard\n\nНесмотря на это, весь ваш опыт и карты получённые с помощью бага были аннулированы. Мы благодарим вас за такую быструю находку уязвимости в системе и надеемся на взаимопонимание." 
-   await bot.send_message(chat_id=1364160996, text=text)
+async def onetime_bugfix():
+ cursor.execute("SELECT xp FROM users WHERE user_id = 1364160996")
+ row = cursor.fetchone()
+ xp = row[0] if row else 0
+ if xp > 1500:
+    cursor.execute("UPDATE users SET xp = 275 WHERE user_id = 1364160996")
+    db.commit()
+    cursor.execute("""
+      UPDATE user_cards 
+      SET count = CASE card_id
+         WHEN 5 THEN 1
+         WHEN 1 THEN 0
+         WHEN 2 THEN 5
+         WHEN 3 THEN 4
+         WHEN 4 THEN 18
+      END
+      WHERE card_id IN (1, 2, 3, 4, 5) AND user_id = 1364160996
+    """)
+    db.commit()
+    cursor.execute("UPDATE card_stats SET first_unlocked = 'Mᴇ Cʀᴀꜰᴛ♡' WHERE card_id = 5")
+    db.commit()
+    text = "Вы первыми в мире открыли карту <b>Сигма Джо Байден</b>!\n+100 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard\n\nНесмотря на это, весь ваш опыт и карты получённые с помощью бага были аннулированы. Мы благодарим вас за такую быструю находку уязвимости в системе и надеемся на взаимопонимание." 
+    await bot.send_message(chat_id=1364160996, text=text)
+
+asyncio.run(onetime_bugfix())
 
 async def season_calculations(): # ДИСПЕТЧЕР СЕЗОНОВ v0.1.2+
  global season, season_start, season_end, season_desc, season_duration
