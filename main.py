@@ -205,7 +205,7 @@ async def season_calculations(): # ДИСПЕТЧЕР СЕЗОНОВ v0.1.2+
      print(f"Не удалось отправить уведомление для {user[0]}: {e}")
    await asyncio.sleep(6)
   if int(time.time()) in range(season_end - 2, season_end + 2):
-   cursor.execute("SELECT full_name, user_id, xp FROM users ORDER BY xp DESC LIMIT 1 OFFSET 2") # ВЫДАЧА НАГРАДЫ ЗА ТОП 1 МИРА
+   cursor.execute("SELECT full_name, user_id, xp FROM users ORDER BY xp DESC LIMIT 1") # ВЫДАЧА НАГРАДЫ ЗА ТОП 1 МИРА
    user = cursor.fetchone()
    cursor.execute("SELECT unlocked_cards FROM users WHERE user_id = ?", (user[1],))
    count_before = cursor.fetchone()[0]
@@ -320,8 +320,8 @@ async def broadcast(message: types.Message):
   "— Оптимизация лидерборда: фильтры «по первенству» и «по коллекции» объединены в общую вкладку со всеми активными и архивными достижениями игроков.\n"
   "— Полностью изменены описания всех карт и обновлен общий стиль их подачи.\n"
   "— Добавлены специальные префиксы для учетных записей администрации.\n"
-  "— Исправлены грамматические ошибки, опечатки и улучшена читаемость системных сообщений, также в некоторых местах добавлено форматирование.</blockquote>\n\n"
-  "В этот раз одноразовая награда по команде недоступна, но в честь выхода обновления в /market уже действуют <b>скидки от -10% до -25%</b>. Также завтра, сразу после старта нового сезона, всем игрокам будет начислено <b>x5 обычных наборов карт</b>."
+  "— Исправлены грамматические ошибки, опечатки и улучшена читаемость системных сообщений и в некоторых местах добавлено форматирование.</blockquote>\n\n"
+  "В этот раз одноразовая награда по команде недоступна, но в честь выхода обновления в маркете уже действуют <b>скидки от -10% до -25%</b>. Также завтра, сразу после старта нового сезона, всем игрокам будет начислено <b>x5 обычных наборов карт</b>."
  )
  cursor.execute("SELECT user_id FROM users")
  rows = cursor.fetchall()
@@ -506,6 +506,10 @@ async def handle_records_leaderboard(callback: CallbackQuery):
  cursor.execute("SELECT first_unlocked FROM card_stats WHERE card_id = 6")
  row = cursor.fetchone()
  first_id6 = row[0] if row and row[0] else "None"
+ if first_id5 in ("wheen. <3", "wheen?🍂"):
+  first_id5 = "None"
+ if first_id6 in ("wheen. <3", "wheen?🍂"):
+  first_id6 = "None"
  if first_id6 != "None":
   results += f"\n{escape(first_id6)} — первый в мире <b>Пожизненный Водолаз Джо Байден</b>"
  if first_id5 != "None":
