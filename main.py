@@ -186,7 +186,7 @@ if xp > 1500:
    cursor.execute("UPDATE users SET xp = 275 WHERE user_id = 1364160996")
    db.commit()
    cursor.execute("""
-     UPDATE count 
+     UPDATE user_cards 
      SET count = CASE card_id
         WHEN 5 THEN 1
         WHEN 1 THEN 0
@@ -197,6 +197,7 @@ if xp > 1500:
      WHERE card_id IN (1, 2, 3, 4, 5) AND user_id = 1364160996
    """)
    db.commit()
+   cursor.execute("UPDATE card_stats SET first_unlocked = 'Mᴇ Cʀᴀꜰᴛ♡' WHERE card_id = 5")
    text = "Вы первыми в мире открыли карту <b>Сигма Джо Байден</b>!\n+100 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard\n\nНесмотря на это, весь ваш опыт и карты получённые с помощью бага были аннулированы. Мы благодарим вас за такую быструю находку уязвимости в системе и надеемся на взаимопонимание." 
    await bot.send_message(chat_id=1364160996, text=text)
 
