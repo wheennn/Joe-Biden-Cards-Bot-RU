@@ -208,7 +208,7 @@ for row in rows:
 cursor.execute("SELECT xp FROM users WHERE user_id = ?", (dev_id,))
 row = cursor.fetchone()
 devs_xp = row[0] if row else 0
-if devs_xp == 148:
+if devs_xp == 183:
  cursor.execute("UPDATE users SET total_cards = 0 WHERE user_id = ?", (dev_id,))
  cursor.execute("UPDATE users SET fpacks = 0 WHERE user_id = ?", (dev_id,))
  cursor.execute("UPDATE users SET xp = 0 WHERE user_id = ?", (dev_id,))
