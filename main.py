@@ -7,6 +7,7 @@ from aiogram.types import FSInputFile, message, InlineKeyboardButton, CallbackQu
 from aiogram.enums import ParseMode
 from dotenv import load_dotenv
 from html import escape
+from datetime import datetime
 import os
 import random
 import sqlite3
@@ -49,12 +50,12 @@ card_descriptions = {
  6: "Более опытный и глубоководный водолаз. Оснащен профессиональным оборудованием и готов бороться за трон Joe Biden Cards. Эксклюзивен за топ 1 мира в течение сезонов."
 }
 card_drop_diapazones = {
+ 6: 0,
  5: 1,
  1: 5,
  2: 15,
  3: 45,
- 4: 100,
- 6: 0
+ 4: 100
 }
 card_chances = {
  1: 4,
@@ -71,6 +72,14 @@ card_xps = {
  4: 2,
  5: 100,
  6: 0
+}
+first_unlocked_date = {
+ 1: "26.04",
+ 2: "23.04",
+ 3: "23.04",
+ 4: "26.04",
+ 5: "07.06",
+ 6: "08.06"
 }
 
 card_pack_selection = InlineKeyboardBuilder() # Выбор действия при просмотре информации набора карт
@@ -179,35 +188,47 @@ try:
 except sqlite3.OperationalError:
  print("Столбец 'fpacks' уже добавлен.")
 
-async def onetime_bugfix():
- cursor.execute("SELECT xp FROM users WHERE user_id = 1364160996")
- row = cursor.fetchone()
- xp = row[0] if row else 0
- if xp > 1500:
-    cursor.execute("UPDATE users SET xp = 275 WHERE user_id = 1364160996")
-    db.commit()
-    cursor.execute("""
-      UPDATE user_cards 
-      SET count = CASE card_id
-         WHEN 5 THEN 1
-         WHEN 1 THEN 0
-         WHEN 2 THEN 5
-         WHEN 3 THEN 4
-         WHEN 4 THEN 18
-      END
-      WHERE card_id IN (1, 2, 3, 4, 5) AND user_id = 1364160996
-    """)
-    db.commit()
-    cursor.execute("UPDATE card_stats SET first_unlocked = 'Mᴇ Cʀᴀꜰᴛ♡' WHERE card_id = 5")
-    db.commit()
-    text = "Вы первыми в мире открыли карту <b>Сигма Джо Байден</b>!\n+100 XP\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard\n\nНесмотря на это, весь ваш опыт и карты получённые с помощью бага были аннулированы. Мы благодарим вас за такую быструю находку уязвимости в системе и надеемся на взаимопонимание." 
-    await bot.send_message(chat_id=1364160996, text=text)
-
-asyncio.run(onetime_bugfix())
+cursor.execute("SELECT user_id FROM users")
+rows = cursor.fetchall()
+for row in rows:
+ cursor.execute("SELECT unlocked_cards FROM users WHERE user_id = ?", (row[0],))
+ info = cursor.fetchone()
+ unlocks = info[0] if info else 0
+ if unlocks == 6 and str(row[0]).count('1') == 2:
+  cursor.execute("UPDATE users SET fpacks = 5 WHERE user_id = ?", (row[0],))
+  cursor.execute("UPDATE users SET unlocked_cards = 5 WHERE user_id = ?", (row[0],))
+  cursor.execute("UPDATE users SET total_cards = 32 WHERE user_id = ?", (row[0],))
+  cursor.execute("UPDATE card_stats SET total_count = total_count - 1 WHERE card_id = 5")
+  cursor.execute("UPDATE card_stats SET total_count = total_count - 5 WHERE card_id = 1")
+  cursor.execute("UPDATE card_stats SET total_count = total_count - 25 WHERE card_id = 2")
+  cursor.execute("UPDATE card_stats SET total_count = total_count - 50 WHERE card_id = 3")
+  cursor.execute("UPDATE card_stats SET total_count = total_count - 89 WHERE card_id = 4")
+  db.commit()
+  break
+cursor.execute("SELECT xp FROM users WHERE user_id = ?", (dev_id,))
+row = cursor.fetchone()
+devs_xp = row[0] if row else 0
+if devs_xp == 148:
+ cursor.execute("UPDATE users SET total_cards = 0 WHERE user_id = ?", (dev_id,))
+ cursor.execute("UPDATE users SET fpacks = 0 WHERE user_id = ?", (dev_id,))
+ cursor.execute("UPDATE users SET xp = 0 WHERE user_id = ?", (dev_id,))
+ cursor.execute("UPDATE users SET unlocked_cards = 0 WHERE user_id = ?", (dev_id,))
+ for i in range(1, 6):
+  cursor.execute("SELECT count FROM user_cards WHERE card_id = ? AND user_id = ?", (i, dev_id))
+  row = cursor.fetchone()
+  count = row[0] if row else 0
+  cursor.execute("UPDATE card_stats SET total_count = total_count - ? WHERE card_id = ?", (count, i))
+  cursor.execute("UPDATE user_cards SET count = 0 WHERE card_id = ? AND user_id = ?", (i, dev_id))
+ cursor.execute("UPDATE card_stats SET first_unlocked = 'cwendyzz' WHERE card_id = 1")
+ cursor.execute("UPDATE card_stats SET first_unlocked = 'KartonNya #998' WHERE card_id = 2")
+ cursor.execute("UPDATE card_stats SET first_unlocked = 'Victony Universal' WHERE card_id = 3")
+ cursor.execute("UPDATE card_stats SET first_unlocked = 'cwendyzz' WHERE card_id = 4")
+ cursor.execute("UPDATE card_stats SET first_unlocked = 'Mᴇ Cʀᴀꜰᴛ♡' WHERE card_id = 5")
+ db.commit()
 
 async def season_calculations(): # ДИСПЕТЧЕР СЕЗОНОВ v0.1.2+
  global season, season_start, season_end, season_desc, season_duration
- season = 0
+ season = 1
  while True:
   if 1777203780 <= int(time.time()) <= 1780912800 and season == 0: # ДОСЕЗОННЫЙ ПЕРИОД
    season_start = 1777203780
@@ -291,26 +312,22 @@ async def showing_db_info(message: types.Message):
  ids = [row[0] for row in cursor.fetchall()]
  text = "<b>ВСЯ ИНФОРМАЦИЯ</b>\n"
  for id in ids:
-  cursor.execute("SELECT full_name, xp, total_cards, unlocked_cards FROM users WHERE user_id = ?", (id,))
+  cursor.execute("SELECT full_name, xp, total_cards, unlocked_cards, fpacks, last_card_time FROM users WHERE user_id = ?", (id,))
   row = cursor.fetchone()
-  full_name, xp, total_cards, unlocked_cards = row if row else ("Anon", 0, 0, 0)
+  full_name, xp, total_cards, unlocked_cards, fpacks, last_card_time = row if row else ("Anon", 0, 0, 0, 0, 0)
   text += f"\n<b>{full_name} — {id} | {xp} XP</b>\n"
-  cursor.execute("SELECT card_id, count FROM user_cards WHERE user_id = ?", (id,))
-  user_cards = cursor.fetchall()
-  for card_id, count in user_cards:
-   card_name = card_names.get(card_id, f"Карта не найдена")
-   text += f"{card_name} — x{count}\n"
-  if unlocked_cards <= 5:
-   text += f"Всего: {total_cards} карт | Открыто: {unlocked_cards}/5\n"
+  for i in card_drop_diapazones.keys():
+   card_name = card_names.get(i, f"Карта не найдена")
+   if get_user_card_count(id, i) > 0:
+    text += f"{card_name} — x{get_user_card_count(id, i)}\n"
+  if unlocked_cards <= 5 and get_user_card_count(id, 6) == 0:
+   text += f"Всего: {total_cards} карт | Открыто: {unlocked_cards}/5"
+  elif unlocked_cards <= 5 and get_user_card_count(id, 6) >= 1:
+   text += f"Всего: {total_cards} карт | Открыто: {unlocked_cards}/6"
   elif unlocked_cards == 6:
-   text += f"Всего: {total_cards} карт | Открыто: {unlocked_cards}/6\n"
-  if id == t1_season0:
-   text += (
-    "\nПервый в мире <b>Водолаз Джо Байден</b>\n"
-    "Первый в мире <b>Сикс Севен Джо Байден</b>\n"
-    "Первый в мире <b>Праздничный Джо Байден</b>\n"
-    "Первый в мире <b>Обычный Джо Байден</b>\n"
-   )
+   text += f"Всего: {total_cards} карт | Открыто: {unlocked_cards}/6"
+  text += f"\nНаборы карт: {fpacks}"
+  text += f"\nПоследнее открытие: {datetime.fromtimestamp(last_card_time).date()}\n"
  cursor.execute("SELECT SUM(total_cards) FROM users WHERE user_id NOT IN (?, ?)", (dev_id, dev_mini_id))
  row = cursor.fetchone()
  total_count = row[0] if row and row[0] is not None else 0
@@ -419,35 +436,55 @@ async def showing_market(message: types.Message):
 
 @dp.callback_query(F.data == "one_fpack_purchase")
 async def processing_one_fpack_purchase(callback: CallbackQuery):
- user_id = callback.from_user.id
- cursor.execute("SELECT xp FROM users WHERE user_id = ?", (user_id,))
- row = cursor.fetchone()
- xp = row[0] if row else 0
- if xp >= 9:
-  cursor.execute("UPDATE users SET xp = xp - 9, fpacks = fpacks + 1 WHERE user_id = ?", (user_id,))
-  db.commit()
-  text = "Вы успешно приобрели <b>x1 обычный набор карт</b> за 9 XP"
-  await callback.message.answer(text)
+ global season, season_start, season_end, season_desc, season_duration
+ left_before_s_end = season_end - time.time()
+ if 86400 >= left_before_s_end > 0:
+  user_id = callback.from_user.id
+  cursor.execute("SELECT xp FROM users WHERE user_id = ?", (user_id,))
+  row = cursor.fetchone()
+  xp = row[0] if row else 0
+  if xp >= 9:
+   cursor.execute("UPDATE users SET xp = xp - 9, fpacks = fpacks + 1 WHERE user_id = ?", (user_id,))
+   db.commit()
+   text = "Вы успешно приобрели <b>x1 обычный набор карт</b> за 9 XP"
+   await callback.message.answer(text)
+  else:
+   text = "Недостаточно XP для покупки. Попробуйте позже."
+   await callback.message.answer(text)
+  await callback.answer()
  else:
-  text = "Недостаточно XP для покупки. Попробуйте позже."
+  left_before_m_appear = left_before_s_end - 86400
+  d = int(left_before_m_appear // 86400)
+  h = int((left_before_m_appear % 86400) // 3600)
+  text = f"🚫 Временный маркет закрыт. До его появления осталось {d}д {h}ч"
   await callback.message.answer(text)
- await callback.answer()
+  await callback.answer()
 
 @dp.callback_query(F.data == "ten_fpacks_purchase")
 async def processing_ten_fpacks_purchase(callback: CallbackQuery):
- user_id = callback.from_user.id
- cursor.execute("SELECT xp FROM users WHERE user_id = ?", (user_id,))
- row = cursor.fetchone()
- xp = row[0] if row else 0
- if xp >= 75:
-  cursor.execute("UPDATE users SET xp = xp - 75, fpacks = fpacks + 10 WHERE user_id = ?", (user_id,))
-  db.commit()
-  text = "Вы успешно приобрели <b>x10 обычных наборов карт</b> за 75 XP"
-  await callback.message.answer(text)
+ global season, season_start, season_end, season_desc, season_duration
+ left_before_s_end = season_end - time.time()
+ if 86400 >= left_before_s_end > 0:
+  user_id = callback.from_user.id
+  cursor.execute("SELECT xp FROM users WHERE user_id = ?", (user_id,))
+  row = cursor.fetchone()
+  xp = row[0] if row else 0
+  if xp >= 75:
+   cursor.execute("UPDATE users SET xp = xp - 75, fpacks = fpacks + 10 WHERE user_id = ?", (user_id,))
+   db.commit()
+   text = "Вы успешно приобрели <b>x10 обычных наборов карт</b> за 75 XP"
+   await callback.message.answer(text)
+  else:
+   text = "Недостаточно XP для покупки. Попробуйте позже."
+   await callback.message.answer(text)
+  await callback.answer()
  else:
-  text = "Недостаточно XP для покупки. Попробуйте позже."
+  left_before_m_appear = left_before_s_end - 86400
+  d = int(left_before_m_appear // 86400)
+  h = int((left_before_m_appear % 86400) // 3600)
+  text = f"🚫 Временный маркет закрыт. До его появления осталось {d}д {h}ч"
   await callback.message.answer(text)
- await callback.answer()
+  await callback.answer()
 
 @dp.message(Command("leaderboard")) # СПИСОК ЛИДЕРОВ v0.1+
 async def show_leaderboard(message: types.Message):
@@ -526,27 +563,13 @@ async def handle_records_leaderboard(callback: CallbackQuery):
   "\n\nПервооткрыватели:"
   "\n<blockquote>Victony — первый в мире <b>Открытый Набор</b> (23.04)"
  )
- cursor.execute("SELECT first_unlocked FROM card_stats WHERE card_id = 5")
- row = cursor.fetchone()
- first_id5 = row[0] if row and row[0] else "None"
- cursor.execute("SELECT first_unlocked FROM card_stats WHERE card_id = 6")
- row = cursor.fetchone()
- first_id6 = row[0] if row and row[0] else "None"
- if first_id5 in ("wheen. <3", "wheen?🍂"):
-  first_id5 = "None"
- if first_id6 in ("wheen. <3", "wheen?🍂"):
-  first_id6 = "None"
- if first_id6 != "None":
-  results += f"\n{escape(first_id6)} — первый в мире <b>Пожизненный Водолаз Джо Байден</b>"
- if first_id5 != "None":
-  results += f"\n{escape(first_id5)} — первый в мире <b>Сигма Джо Байден</b>"
- results += (
-  "\ncwendyzz — первый в мире <b>Водолаз Джо Байден</b> (26.04)"
-  "\ncwendyzz — первый в мире <b>Сикс Севен Джо Байден</b> (26.04)"
-  "\nVictony — первый в мире <b>Праздничный Джо Байден</b> (23.04)"
-  "\ncwendyzz — первый в мире <b>Обычный Джо Байден</b> (26.04)"
-  "\ncwendyzz — первая в мире <b>Полная Коллекция</b> (26.04)</blockquote>"
- )
+ for i in card_drop_diapazones.keys():
+  cursor.execute("SELECT first_unlocked FROM card_stats WHERE card_id = ?", (i,))
+  row = cursor.fetchone()
+  first = row[0] if row else 0
+  results += f"\n{escape(first)} — первый в мире <b>{card_names.get(i)}</b> ({first_unlocked_date.get(i)})"
+ results += "\ncwendyzz — первая в мире <b>Полная Коллекция 4/4</b> (26.04)"
+ results += "\nMᴇ Cʀᴀꜰᴛ♡ — первая в мире <b>Полная Коллекция 5/5</b> (08.06)</blockquote>"
  await callback.message.answer(results)
  await callback.answer()
 
@@ -560,7 +583,7 @@ async def start_handler(message: types.Message):
  "GitHub — https://github.com/wheennn/Joe-Biden-Cards-Bot-RU\n\n"
  "Весь материал используется исключительно в шуточных целях.\n\n"
  "Чтобы начать игру, используйте команду /card\n\n"
- "Актуальная версия: v0.1.2"
+ "Актуальная версия: v0.1.2.1"
  )
  await message.answer(text)
 
@@ -655,6 +678,7 @@ async def opening(callback: CallbackQuery):
   card_pack_opening_selection.button(text=f"Открыть из запасов ({fpacks} шт.)", callback_data="opening_through_fpacks")
  card_pack_opening_selection.adjust(1)
  await callback.message.edit_text(text=f"Выберите способ открытия:",reply_markup=card_pack_opening_selection.as_markup())
+ await callback.answer()
 
 @dp.callback_query(F.data == "opening_through_cd")
 async def opening_through_cd(callback: CallbackQuery):
@@ -733,6 +757,7 @@ async def opening_through_cd(callback: CallbackQuery):
   elif fpacks >= 1:
    text = f"⏱️ Сейчас данный набор находится в КД. Вы сможете открыть его через <b>{minutes}m {seconds}s</b>. Вы также можете открыть набор <b>прямо сейчас</b> потратив свои накопленные запасы."
   await callback.message.answer(text)
+  await callback.answer()
   
 @dp.callback_query(F.data == "opening_through_fpacks")
 async def opening_through_fpacks(callback: CallbackQuery):
@@ -809,6 +834,7 @@ async def opening_through_fpacks(callback: CallbackQuery):
  else:
   text = "Недостаточно наборов карт. Попробуйте позже."
   await callback.message.answer(text)
+  await callback.answer()
 
 @dp.callback_query(F.data == "next_pack")
 async def next_pack(callback: CallbackQuery):
@@ -838,52 +864,54 @@ async def reminder(): # СИСТЕМА НАПОМИНАНИЙ v0.1.1+
     continue
    try:
     if diff >= 84600 and reminder_24 == 0:
-     random_reminder = random.randint(1, 4)
+     random_reminder = random.randint(1, 5)
      if random_reminder == 1:
-      text = "С момента твоего последнего открытия прошло уже более дня! Ты собираешься играть, или просто дашь обогнать себя в лидерборде?!\n\nНажми /card чтоб открыть набор карточек."
-      await bot.send_message(chat_id=user_id, text=text)
+      text = "С момента твоего последнего открытия прошло уже более дня! <b>Ты собираешься играть</b>, или <b>просто дашь обогнать себя в лидерборде</b>?!\n\nНажми /card чтобы открыть набор карточек"
      elif random_reminder == 2:
-      text = "Другие игроки вот-вот обгонят тебя и твой опыт зарастет мхом! У тебя остался последний шанс прежде ты упадешь в лидерборде.\n\nНажми /card чтоб открыть набор карточек."
-      await bot.send_message(chat_id=user_id, text=text)
+      text = "😔 Другие игроки вот-вот обгонят тебя и <b>твой опыт зарастёт мхом</b>! У тебя остался <b>последний шанс прежде ты упадёшь в лидерборде</b>.\n\nНажми /card чтобы открыть набор карточек"
      elif random_reminder == 3:
-      text = "Джо Байден соскучился по тебе.. Ты не открывал наборы с карточками уже почти 24 часа. У тебя что-то случилось?\n\n Если не хочешь расстроить Джо Байдена еще больше, нажми /card чтоб открыть набор карточек."
-      await bot.send_message(chat_id=user_id, text=text)
+      text = "😢 <b>Джо Байден соскучился по тебе</b>.. Ты не открывал наборы с карточками уже почти 24 часа. У тебя что-то случилось?\n\nЕсли не хочешь расстроить Джо Байдена еще больше, нажми /card чтобы открыть набор карточек"
      elif random_reminder == 4:
-      text = "Хочешь получить Водолаза? Так делай хоть что-то, а то с момента твоего последнего открытия прошел уже целый день!\n\nНе хочешь оказаться на дне как Водолаз? Заходи и открывай набор с карточками через /card ."
-      await bot.send_message(chat_id=user_id, text=text)
+      text = "Хочешь получить хотя-бы <b>Водолаза</b> или даже <b>Сигму</b>? Так делай хоть что-то, а то с момента твоего последнего открытия прошёл уже целый день!\n\n<b>Не хочешь оказаться на дне как Водолаз</b>? Заходи и открывай набор с карточками через /card"
+     elif random_reminder == 5:
+      text = "Знаешь, <b>Сигма Джо Байден</b> ведь тоже не сразу стал таким крутым, <b>он достиг этого самостоятельно</b>. А вот ты — лентяй! Иди и открывай карточку, если хочешь достичь хоть чего-то!\n\nНажми /card для открытия"
+     await bot.send_message(chat_id=user_id, text=text)
      cursor.execute("UPDATE reminder_spam SET reminder_24 = ? WHERE user_id = ?", (time.time(), user_id))
      db.commit()
     elif 28800 <= diff < 84600 and reminder_8 == 0:
-     random_reminder = random.randint(1, 4)
+     random_reminder = random.randint(1, 5)
      if random_reminder == 1:
-      text = "Я имел большие надежды на тебя, а ты просто взял и забил! Выбрал личную жизнь, а не меня!\n\nВдруг захочешь исправиться в моих глазах - команда /card тебе поможет."
-      await bot.send_message(chat_id=user_id, text=text)
+      text = "🙄 Я имел большие надежды на тебя, а <b>ты просто взял и забил</b>! <b>Выбрал личную жизнь, а не меня</b>!\n\nВдруг захочешь исправиться в моих глазах - команда /card тебе поможет"
      elif random_reminder == 2:
-      text = "Хорошо. Я пытался заинтересовать тебя, дать шанс.. Но раз ты не открываешь карточки уже 8 часов, что ж поделаешь!\n\nВдруг захочешь исправиться - нажми команду /card."
-      await bot.send_message(chat_id=user_id, text=text)
+      text = "🙄 Хорошо. Я <b>пытался заинтересовать тебя</b>, дать шанс.. Но раз ты не открываешь карточки уже 8 часов, что ж поделаешь!\n\nВдруг захочешь исправиться - нажми команду /card"
      elif random_reminder == 3:
-      text = "Ах ты проказник вот такой! Не заходишь в бота уже 8 часов, значит плакал за тобой Водолаз! Не быть тебе топ 1 мира с такой дисциплиной.\n\nНажми /card чтоб открыть набор карточек."
-      await bot.send_message(chat_id=user_id, text=text)
+      text = "😡 Ах ты проказник вот такой! Не заходишь в бота уже 8 часов, значит <b>плакал за тобой Сигма</b>! Не быть тебе топ 1 мира с такой дисциплиной.\n\nНажми /card чтобы открыть набор карточек"
      elif random_reminder == 4:
-      text = "Легенда гласит - если прямо сейчас откроешь набор, тебе выпадет твоя заветная карточка. Я ведь мудрец - а мудрецы не ошибаются.\n\nВдруг тебе и правда повезет? Просто нажми /card ."
-      await bot.send_message(chat_id=user_id, text=text)
+      text = "Легенда гласит — <b>если прямо сейчас откроешь набор, тебе выпадет твоя заветная карточка</b>. Я ведь мудрец — а мудрецы не ошибаются.\n\nВдруг тебе и правда повезет? Просто нажми /card"
+     elif random_reminder == 5:
+      text = "♾️ Восьмёрка — символ нового начала, возрождения и рая. Именно столько часов ты не открывал карточку, так пойди и открой, и достигнешь своего дзена!\n\nНажми /card чтобы открыть набор карточек"
+     await bot.send_message(chat_id=user_id, text=text)
      cursor.execute("UPDATE reminder_spam SET reminder_8 = ? WHERE user_id = ?", (time.time(), user_id))
      db.commit()
     elif 7200 <= diff < 28800 and reminder_2 == 0:
-     random_reminder = random.randint(1, 3)
+     random_reminder = random.randint(1, 4)
      if random_reminder == 1:
-      text = "С момента вашего последнего открытия прошло уже около 2 часов.\n\nНажмите /card для открытия."
-      await bot.send_message(chat_id=user_id, text=text)
+      text = "С момента вашего последнего открытия <b>прошло уже около 2 часов</b>.\n\nНажмите /card для открытия"
      elif random_reminder == 2:
-      text = "Твои конкуренты уже лутают опыт во всю, а ты что?\n\nНажми /card и компенсируй утерянное."
-      await bot.send_message(chat_id=user_id, text=text)
+      text = "📈 Твои <b>конкуренты уже лутают опыт во всю</b>, а ты что?\n\nНажми /card и компенсируй утерянное"
      elif random_reminder == 3:
-      text = "Раз ты хочешь получить хотя бы Праздничного Джо, лучше не забывай открывать карточки. А там, вдруг ты захочешь поохотиться за Водолазом и топ 1 мира.\n\nНажми /card чтоб открыть набор карточек."
-      await bot.send_message(chat_id=user_id, text=text)
+      text = "😉 Раз ты хочешь получить хотя бы <b>Сикс Севен Джо</b>, лучше не забывай открывать карточки. А там, вдруг ты захочешь <b>поохотиться за Сигмой и топ 1 мира</b>.\n\nНажми /card чтобы открыть набор карточек"
+     elif random_reminder == 4:
+      text = "⌛ Часики тикают, а <b>твои шансы достичь топа всё уменьшаются</b>!\n\nНажми /card и компенсируй утерянное"
+     await bot.send_message(chat_id=user_id, text=text)
      cursor.execute("UPDATE reminder_spam SET reminder_2 = ? WHERE user_id = ?", (time.time(), user_id))
      db.commit()
     elif 1800 <= diff < 7200 and reminder_cd == 0:
-     text = "⏱️ КД обычного набора карточек закончился! Нажмите /card для открытия."
+     random_reminder = random.randint(1, 2)
+     if random_reminder == 1:
+      text = "⏱️ КД обычного набора карточек закончился! Нажмите /card для открытия"
+     elif random_reminder == 2:
+      text = "⏱️ Пришло время выбивать новых Джо Байденов — КД обычного набора карточек закончился! Используй /card для открытия"
      await bot.send_message(chat_id=user_id, text=text)
      cursor.execute("UPDATE reminder_spam SET reminder_cd = ? WHERE user_id = ?", (time.time(), user_id))
      db.commit()
@@ -929,7 +957,7 @@ async def checking_up_answer(message: types.Message):
    cursor.execute("SELECT total_cards FROM users WHERE user_id = ?", (given_id,))
    row = cursor.fetchone()
    total_cards = row[0] if row else 0
-   if total_cards > 0 and get_user_card_count(given_id, 6) == 0:
+   if total_cards > 0:
     text += "\n\nОбычные:\n<blockquote>"
    if get_user_card_count(given_id, 5) > 0:
     text += f"Сигма Джо Байден — x{get_user_card_count(given_id, 5)}\n"
