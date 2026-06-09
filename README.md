@@ -68,6 +68,7 @@ python "main.py"
 ## Контрибьюторы
 
 [@qlexx998](https://github.com/qlexx998) – дизайн для Обычного и Праздничного Джо Байденов
+
 [@subarash-ii](https://github.com/subarash-ii) – хостинг бота и поддержка работы сервера
 
 ## Лицензия
