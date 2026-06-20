@@ -47,7 +47,7 @@ comp_user4 = int(os.getenv("COMPENSATION4"))
 comp_user5 = int(os.getenv("COMPENSATION5"))
 comp_user6 = int(os.getenv("COMPENSATION6"))
 
-bot = Bot(token="8794909113:AAFv7jGQMDM7Tlc1IZKcXPO2BER3tHVmjVc", default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
 
 card_names = {
