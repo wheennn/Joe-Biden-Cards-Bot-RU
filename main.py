@@ -1,4 +1,4 @@
-# Joe Biden Cards — v0.1.3.1
+# Joe Biden Cards — v0.1.4
 # Est. 23.04.2026
 # by wheen
 
@@ -25,27 +25,27 @@ season_desc = ""
 season_duration = 0
 season = 0
 waiting_users = set()
-fpack_CD = 900
-spack_CD = 1800
+if int(time.time()) <= 1782594000:
+ fpack_CD = 900 * 0.8
+ spack_CD = 1800 * 0.8
+else:
+ fpack_CD = 900
+ spack_CD = 1800
+fpack_full_coll = 5
+spack_full_coll = 5
+exclusive_full_coll = 1
+full_coll = 10
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
 load_dotenv(os.path.join(base_dir, "data.env"))
 
 token = os.getenv("BOT_TOKEN")
+test_token = os.getenv("TEST_BOT_TOKEN")
 db_name = os.getenv("DATABASE").strip()
-users_env = os.getenv("USERS_WITH_FULL_COLLECTION")
-full_coll_users = [int(x) for x in users_env.split(",")]
 dev_id = int(os.getenv("DEV_ID"))
 dev2_id = int(os.getenv("DEV2_ID"))
 dev_mini_id = int(os.getenv("DEV_MINI_ID"))
-t1_season0 = int(os.getenv("TOP1_SEASON0"))
-comp_user1 = int(os.getenv("COMPENSATION1"))
-comp_user2 = int(os.getenv("COMPENSATION2"))
-comp_user3 = int(os.getenv("COMPENSATION3"))
-comp_user4 = int(os.getenv("COMPENSATION4"))
-comp_user5 = int(os.getenv("COMPENSATION5"))
-comp_user6 = int(os.getenv("COMPENSATION6"))
 
 bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
@@ -61,7 +61,7 @@ card_names = {
  8: "Джо Байден в Разрешении 38:9",
  9: "Джо Байден.exe",
  10: "Троллфейс Джо Байден",
- 11: "Юрий Джо Байден"
+ 11: "Финальный Босс Джо Байден"
 }
 card_descriptions = {
  1: "Потно пахающий водолаз, выполняющий всю грязную работу. Одет в неплохое оборудование, но не сравнится с Пожизненным Водолазом. Как можно заметить, его труд был оценен поэтому он стал довольно редкой картой.",
@@ -73,10 +73,11 @@ card_descriptions = {
  7: "Жертва жесткого сжатия и растяжения, застрявшая в непривычном для людей разрешении. Настолько узкий и вытянутый, как кое-что другое, что может протиснуться сквозь текстуры игры и следить за балансом.",
  8: "Абсолютная противоположность его дружка, раздувшаяся до невероятных горизонталей. Стал настолько жирным, что теперь в одиночку занимает половину экрана и блокирует подводный проход для водолазов.",
  9: "Настоящий псевдо-хакер, которого нужно бояться в случае обнаружения вирусов. Попытался наложить на себя глитч-эффекты, чтобы быть более ужасающим, так ещё и PNG-шки ошибок достал сразу.",
- 10: "Очень могущественный и непобедимый Джо Байден. Натапал хомячка в 2024 году и ушёл на пенсию, ведь заработал на три поколения вперёд. Одет в стильную маску троллфейса, чтобы демонстрировать всем, что с ним лучше не шутить."
+ 10: "Очень могущественный и непобедимый Джо Байден. Натапал хомячка в 2024 году и ушёл на пенсию, ведь заработал на три поколения вперёд. Одет в стильную маску троллфейса, чтобы демонстрировать всем, что с ним лучше не шутить.",
+ 11: "Последний и самый хардкорный босс, выбивание которого становится настоящим испытанием. Сбежал из популярной RPG-игры, чтобы попасть в Joe Biden Cards и показать игрокам своё величие. Закован в тяжёлую броню, вооружён огромным мечом и появляется прямо посреди очередной пламенной зарубы. Говорят, победить его невозможно. К счастью — выбить можно."
 }
 card_drop_diapazones = {
- 11: 0,
+ 11: 1,
  10: 5,
  9: 15,
  8: 45,
@@ -85,7 +86,7 @@ card_drop_diapazones = {
  1: 5,
  2: 15,
  3: 45,
- 4: 100,
+ 4: 100
 }
 card_chances = {
  1: 4,
@@ -97,8 +98,8 @@ card_chances = {
  7: 55,
  8: 30,
  9: 10,
- 10: 5,
- 11: 0
+ 10: 4,
+ 11: 1
 }
 card_xps = {
  1: 40,
@@ -111,7 +112,7 @@ card_xps = {
  8: 10,
  9: 24,
  10: 60,
- 11: 0
+ 11: 190
 }
 first_unlocked_date = {
  1: "26.04",
@@ -123,7 +124,7 @@ first_unlocked_date = {
  7: "16.06",
  8: "16.06",
  9: "16.06",
- 10: "???"
+ 10: "21.06"
 }
 first_unlocked_rewards = {
  1: 4,
@@ -138,50 +139,24 @@ first_unlocked_rewards = {
  10: 4,
  11: 5
 }
-global_rewards_indicators = {
- "total_cards_st1": 100,
- "total_cards_st2": 300,
- "total_cards_st3": 500,
- "sigma_cards_st1": 5,
- "sigma_cards_st2": 10,
- "diver_cards_st1": 10,
- "diver_cards_st2": 25,
- "diver_cards_st3": 50,
- "sixseven_cards_st1": 25,
- "sixseven_cards_st2": 50,
- "sixseven_cards_st3": 100
+prefixes = {
+ 1: "[DEV] ",
+ 2: "[🥇] ",
+ 3: "[🥈] ",
+ 4: "[🥉] "
 }
-global_rewards = {
- "total_cards_st1": 50,
- "total_cards_st2": 150,
- "total_cards_st3": 250,
- "sigma_cards_st1": 200,
- "sigma_cards_st2": 400,
- "diver_cards_st1": 100,
- "diver_cards_st2": 250,
- "diver_cards_st3": 500,
- "sixseven_cards_st1": 50,
- "sixseven_cards_st2": 100,
- "sixseven_cards_st3": 200
-}
-global_rewards_names = {
- "total_cards_st1": "Общий Тираж — Уровень 1",
- "total_cards_st2": "Общий Тираж — Уровень 2",
- "total_cards_st3": "Общий Тираж — Уровень 3",
- "sigma_cards_st1": "Тираж Сигм — Уровень 1",
- "sigma_cards_st2": "Тираж Сигм — Уровень 2",
- "diver_cards_st1": "Тираж Водолазов — Уровень 1",
- "diver_cards_st2": "Тираж Водолазов — Уровень 2",
- "diver_cards_st3": "Тираж Водолазов — Уровень 3",
- "sixseven_cards_st1": "Тираж Сикс Севенов — Уровень 1",
- "sixseven_cards_st2": "Тираж Сикс Севенов — Уровень 2",
- "sixseven_cards_st3": "Тираж Сикс Севенов — Уровень 3"
+season_nums_to_words = {
+ 0: "нулевом",
+ 1: "первом",
+ 2: "втором",
+ 3: "третьем",
+ 4: "четвёртом",
+ 5: "пятом"
 }
 
 leaderboard_mode_selection = InlineKeyboardBuilder() # Выбор фильтра лидерборда
 leaderboard_mode_selection.button(text="Сезонный лидерборд", callback_data="season_leaderboard")
 leaderboard_mode_selection.button(text="Лидерборд достижений", callback_data="records_leaderboard")
-leaderboard_mode_selection.button(text="Глобальные достижения", callback_data="global_achievements")
 leaderboard_mode_selection.adjust(1)
 
 db = sqlite3.connect(os.path.join(base_dir, db_name))
@@ -233,17 +208,15 @@ CREATE TABLE IF NOT EXISTS season_info (
 db.commit()
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS global_rewards (
- total_cards_st1 INTEGER DEFAULT 1,
- total_cards_st2 INTEGER DEFAULT 0,
- total_cards_st3 INTEGER DEFAULT 0,
- sigma_cards_st1 INTEGER DEFAULT 0,
- sigma_cards_st2 INTEGER DEFAULT 0,
- diver_cards_st1 INTEGER DEFAULT 1,
- diver_cards_st2 INTEGER DEFAULT 0,
- diver_cards_st3 INTEGER DEFAULT 0,
- sixseven_cards_st1 INTEGER DEFAULT 1,
- sixseven_cards_st2 INTEGER DEFAULT 0,
- sixseven_cards_st3 INTEGER DEFAULT 0
+ reward_name TEXT NOT NULL,
+ reward_indicator INTEGER NOT NULL,
+ reward_xp INTEGER NOT NULL,
+ reward_stage INTEGER NOT NULL,
+ status INTEGER DEFAULT 0 NOT NULL,
+ id INTEGER DEFAULT 1 NOT NULL,
+ CONSTRAINT status_check CHECK (status IN (0, 1)),
+ CONSTRAINT stage_check CHECK (reward_stage IN (1, 2, 3, 4, 5)),
+ UNIQUE(id, reward_name, reward_stage)
 )
 """)
 cursor.execute("""
@@ -253,6 +226,7 @@ CREATE TABLE IF NOT EXISTS settings (
  user_id INTEGER PRIMARY KEY
 )
 """)
+db.commit()
 
 def add_card(user_id: int, card_id: int, xp_to_add: int, nickname: str):
  cursor.execute("""
@@ -314,8 +288,8 @@ async def card_pack_opening(callback: CallbackQuery, pack_name: str, type: str):
    else:
     current_left = spack_CD - int(time.time() - opening_time_before)
    if current_left > 0:
-    minutes = current_left // 60
-    seconds = current_left % 60
+    minutes = int(current_left // 60)
+    seconds = int(current_left % 60)
     if accums == 0:
      text = f"⏱️ Сейчас данный набор находится в КД. Вы сможете открыть его через <b>{minutes}m {seconds}s</b>."
     elif accums >= 1:
@@ -365,9 +339,9 @@ async def card_pack_opening(callback: CallbackQuery, pack_name: str, type: str):
       cursor.execute("UPDATE users SET fpack_progress = fpack_progress + 20 WHERE user_id = ?", (user_id,))
      elif pack_name == "spack":
       cursor.execute("UPDATE users SET spack_unlocked_cards = spack_unlocked_cards + 1 WHERE user_id = ?", (user_id,))
-      cursor.execute("UPDATE users SET spack_progress = spack_progress + 25 WHERE user_id = ?", (user_id,))
+      cursor.execute("UPDATE users SET spack_progress = spack_progress + 20 WHERE user_id = ?", (user_id,))
      cursor.execute("UPDATE users SET unlocked_cards = unlocked_cards + 1 WHERE user_id = ?", (user_id,))
-     cursor.execute("UPDATE users SET total_progress = total_progress + 11 WHERE user_id = ?", (user_id,))
+     cursor.execute("UPDATE users SET total_progress = total_progress + 10 WHERE user_id = ?", (user_id,))
      db.commit()
     if card_names.get(i, "") == "Джо Байден в Разрешении 9:38":
      actual_card_name = "ДжоБайденВРазрешении9к38.jpg"
@@ -417,37 +391,42 @@ async def card_pack_opening(callback: CallbackQuery, pack_name: str, type: str):
       cursor.execute("UPDATE users SET spacks = spacks + ? WHERE user_id = ?", (first_unlocked_rewards.get(i, 0), user_id))
      db.commit()
     if count_after == 5 and count_before == 4:
-     if pack_name == "fpack":
-      text = (
-       f"Вы собрали <b>полную коллекцию Джо Байденов</b> из <b>Обычного Набора Карт</b> и завершили прохождение <b>Первой стадии</b>! Последней нужной картой стал <b>{card_names.get(i, "")}</b>. В честь этого вы получаете награду в виде <b>50 XP</b> и <b>3 расширенных набора карт</b>.\n"
-       "Теперь вы разблокировали <b>Расширенный Набор Карт</b> и начали прохождение <b>Второй стадии</b>, а также с этого момента при открытии обычного набора вы будете получать в два раза меньше опыта.\n\n"
-       "<b>Ваши показатели на момент достижения:</b>\n"
-       f"<blockquote>Сигма Джо Байден — x{get_user_card_count(user_id, 6)}\n"
-       f"Водолаз Джо Байден — x{get_user_card_count(user_id, 1)}\n"
-       f"Сикс Севен Джо Байден — x{get_user_card_count(user_id, 2)}\n"
-       f"Праздничный Джо Байден — x{get_user_card_count(user_id, 3)}\n"
-       f"Обычный Джо Байден — x{get_user_card_count(user_id, 4)}\n"
-       f"В сумме: {sum(get_user_card_count(user_id, cid) for cid in (1, 2, 3, 4, 5))}</blockquote>\n"
-       "Вы можете поделиться или померяться данными счетчиками с вашими друзьями, пересылая это сообщение.\n\n"
-       "Для открытия и просмотра нового набора нажмите /card, или /menu для просмотра вашей уникальной коллекции"
-      )
-      cursor.execute("UPDATE users SET xp = xp + 50 WHERE user_id = ?", (user_id,))
-      cursor.execute("UPDATE users SET spacks = spacks + 3 WHERE user_id = ?", (user_id,))
-      cursor.execute("UPDATE users SET pack_stage = 2 WHERE user_id = ?", (user_id,))
-      db.commit()
-      await callback.message.answer(text)
-    if total_before == 8 and total_after == 9: 
+     card_ids = [5, 1, 2, 3, 4] if pack_name == "fpack" else [11, 10, 9, 8, 7] if pack_name == "spack" else [0, 0, 0, 0, 0]
+     from_where = "Обычного Набора Карт" if pack_name == "fpack" else "Расширенного Набора Карт" if pack_name == "spack" else ""
+     stage = "Первой стадии" if pack_name == "fpack" else "Второй стадии" if pack_name == "spack" else ""
+     next_stage = "Второй стадии" if pack_name == "fpack" else "Третьей стадии" if pack_name == "spack" else ""
+     reward_xp = 50 if pack_name == "fpack" else 125 if pack_name == "spack" else 0
+     unlocked_pack = "Расширенный Набор Карт" if pack_name == "fpack" else "tpack" if pack_name == "spack" else ""
      text = (
-      f"<b>{escape(nickname)}</b>, вы собрали <b>полную коллекцию Джо Байденов</b> из <b>9 карт</b>! Теперь вы официально прошли <b>Joe Biden Cards</b> и ваш общий достигнутый <b>прогресс равен 100%</b>!\n\n"
+      f"Вы собрали <b>полную коллекцию Джо Байденов</b> из <b>{from_where}</b> и завершили прохождение <b>{stage}</b>! Последней нужной картой стал <b>{card_names.get(i, "")}</b>. Теперь вы разблокировали <b>{unlocked_pack}</b> и начали прохождение <b>{next_stage}</b>. В честь этого вы получаете награду в виде <b>{reward_xp} XP</b> и <b>3 следующих набора карт</b>.\n"
+      f"С этого момента при открытии {from_where[:-5].lower()} вы будете получать в два раза меньше опыта.\n\n"
+      "<b>Ваши показатели на момент достижения:</b>\n<blockquote>"
+     )
+     for i in card_ids:
+      text += f"{card_names.get(i)} — x{get_user_card_count(user_id, i)}\n"
+     text += (
+      f"В сумме: {sum(get_user_card_count(user_id, cid) for cid in card_ids)}</blockquote>\n"
+      "Вы можете поделиться или померяться данными счетчиками с вашими друзьями, пересылая это сообщение.\n\n"
+      "Для открытия и просмотра нового набора нажмите /card, или /menu для просмотра вашей уникальной коллекции"
+     )
+     if pack_name == "fpack":
+      cursor.execute("UPDATE users SET xp = xp + 50, spacks = spacks + 3, pack_stage = 2 WHERE user_id = ?", (user_id,))
+     elif pack_name == "spack":
+      cursor.execute("UPDATE users SET xp = xp + 125 WHERE user_id = ?", (user_id,))
+     db.commit()
+     await callback.message.answer(text)
+    if total_before == full_coll - 1 and total_after == full_coll: 
+     text = (
+      f"<b>{escape(nickname)}</b>, вы собрали <b>полную коллекцию Джо Байденов</b> из <b>10 карт</b>! Теперь вы официально прошли <b>Joe Biden Cards</b> и ваш общий достигнутый <b>прогресс равен 100%</b>!\n\n"
       "Поскольку бот активно обновляется и выходят новые карты, с целью баланса мы не можем выдать вам какую-либо награду, но знайте, <b>ваше имя</b> уже записано в <b>истории проекта!</b>\n\n"
       "Продолжайте играть, дожидаться новых обновлений и соревноваться за топ-1 мира, ведь теперь перед вами полностью открыта сфера соревнований за эксклюзивные награды!"
      )
      cursor.execute("UPDATE users SET total_progress = 100 WHERE user_id = ?", (user_id,))
      db.commit()
      await callback.message.answer(text)
-    elif total_before == 9 and total_after == 10:
+    elif total_before == full_coll and total_after == full_coll + 1:
      text = (
-      f"<b>{escape(nickname)}</b>, вы собрали <b>абсолютно полную коллекцию Джо Байденов</b> из <b>10 карт</b>! Теперь вы официально прошли <b>Joe Biden Cards и ваш общий достигнутый <b>прогресс равен 100%</b>!\n\n"
+      f"<b>{escape(nickname)}</b>, вы собрали <b>абсолютно полную коллекцию Джо Байденов</b> из <b>11 карт</b>! Теперь вы официально прошли <b>Joe Biden Cards и ваш общий достигнутый <b>прогресс равен 100%</b>!\n\n"
       "Поскольку бот активно обновляется и выходят новые карты, с целью баланса мы не можем выдать вам какую-либо награду, но знайте, <b>ваше имя</b> уже записано в <b>истории проекта!</b>\n\n"
       "Продолжайте играть, дожидаться новых обновлений и соревноваться за топ-1 мира!"
      )
@@ -459,146 +438,241 @@ async def card_pack_opening(callback: CallbackQuery, pack_name: str, type: str):
      db.commit()
     await callback.answer()
     break
-
-cursor.execute("SELECT xp FROM users WHERE user_id = ?", (dev_mini_id,)) # СЕТАП v0.1.3.1
-row = cursor.fetchone()[0]
-if row == 1708.5:
- cursor.execute("UPDATE users SET xp = 0, pack_stage = 1, unlocked_cards = 0, fpack_unlocked_cards = 0, spack_unlocked_cards = 0, total_progress = 0, fpack_progress = 0, spack_progress = 0, total_cards = 0, fpacks = 0, spacks = 0 WHERE user_id = ?", (dev_mini_id,))
- for i in range(1, 11):
-  cursor.execute("SELECT count FROM user_cards WHERE card_id = ? AND user_id = ?", (i, dev_mini_id))
-  res = cursor.fetchone()
-  count = res[0] if res is not None else 0 
-  cursor.execute("UPDATE user_cards SET count = 0 WHERE card_id = ? AND user_id = ?", (i, dev_mini_id))
-  cursor.execute("UPDATE card_stats SET total_count = total_count - ? WHERE card_id = ?", (count, i))
+def prefixes_selection(id: int):
+ cursor.execute("SELECT user_id FROM users WHERE user_id NOT IN (?, ?) ORDER BY xp DESC LIMIT 3",(dev_id, dev_mini_id))
+ rows = cursor.fetchall()
+ top_ids = [r[0] for r in rows]
+ while len(top_ids) < 3:
+  top_ids.append(0)
+ index = 1
+ status = ""
+ if id in (dev_id, dev_mini_id):
+  status = prefixes.get(1)
+ else:
+  for i in top_ids:
+   if id == i:
+    status = prefixes.get(index + 1)
+    break
+   index += 1
+ return status
+async def market_purchase(callback: CallbackQuery, cost: int, product_quantity: int, product_name: str, is_one_time: bool):
+ global season, season_start, season_end, season_desc, season_duration
+ left_before_s_end = season_end - time.time()
+ user_id = callback.from_user.id
+ cursor.execute("SELECT xp FROM users WHERE user_id = ?", (user_id,))
+ row = cursor.fetchone()
+ xp = row[0] if row else 0
+ name_in_text = "Обычных" if product_name == "fpacks" else "Расширенных"
+ if 86400 >= left_before_s_end > 0:
+  if is_one_time == True:
+   cursor.execute("SELECT purchased_special_action FROM users WHERE user_id = ?", (user_id,))
+   row = cursor.fetchone()
+   did_purchase = row[0] if row else 0
+   if did_purchase == 1:
+    purchase_succeed = False
+   else:
+    purchase_succeed = True
+  elif is_one_time == False:
+   purchase_succeed = True
+  if purchase_succeed == True:
+   if xp >= cost:
+    cursor.execute(f"UPDATE users SET xp = xp - ?, {product_name} = {product_name} + ? WHERE user_id = ?", (cost, product_quantity, user_id))
+    db.commit()
+    text = f"Вы успешно приобрели <b>x{product_quantity} {name_in_text} Наборов Карт</b> за {cost} XP"
+    await callback.message.answer(text)
+   else:
+    text = "Недостаточно XP для покупки. Попробуйте позже."
+    await callback.message.answer(text)
+  else:
+   text = f"Вы уже приобрели акцию <b>x{product_quantity} {name_in_text}</b> за <b>{cost}</b>"
+   await callback.answer()
+ else:
+  left_before_m_appear = left_before_s_end - 86400
+  d = int(left_before_m_appear // 86400)
+  h = int((left_before_m_appear % 86400) // 3600)
+  text = f"🚫 Временный маркет закрыт. До его появления осталось {d}д {h}ч"
+  await callback.message.answer(text)
+  await callback.answer()
+async def opening_per_time_setting(callback: CallbackQuery, change_to: int):
+ user_id = callback.from_user.id
+ cursor.execute("UPDATE settings SET openings_per_time = ? WHERE user_id = ?", (change_to, user_id))
  db.commit()
- cursor.execute("SELECT user_id FROM users")
- users = cursor.fetchall()
- for user in users:
-  user_id = user[0]
-  cursor.execute("SELECT unlocked_cards, total_progress FROM users WHERE user_id = ?", (user_id,))
-  res = cursor.fetchone()
-  unlock, prog = res if res is not None else (0, 0)
-  if prog < 95:
-   cursor.execute("UPDATE users SET total_progress = 11 * ? WHERE user_id = ?", (unlock, user_id))
-  elif 95 <= prog <= 100:
-   cursor.execute("UPDATE users SET total_progress = 100 WHERE user_id = ?", (user_id,))
- try:
-  cursor.execute("ALTER TABLE users ADD COLUMN purchased_special_action INTEGER DEFAULT 0")
-  db.commit()
- except sqlite3.OperationalError:
-  pass
+ noun = "карте" if change_to == 1 else "карты"
+ if noun == "карты" and change_to == 5:
+  noun = "карт"
+ text = f"Вы успешно изменили эту настройку. Теперь при открытии наборов из запасов вы всегда будете открывать по {change_to} {noun} за раз."
+ opening_per_time_back_to_settings = InlineKeyboardBuilder() # Возможность выйти после смены настройки
+ opening_per_time_back_to_settings.button(text="Назад", callback_data="back_to_settings")
+ await callback.message.edit_text(text=text, reply_markup=opening_per_time_back_to_settings.as_markup())
+ await callback.answer()
+async def showing_global_achs_by_card(callback: CallbackQuery, card_name: str):
+ pack_name = "Обычный набор" if card_name in ("sigma", "diver", "sixseven") else "Расширенный набор"
+ achievement_name = "Тираж Сигм" if card_name == "sigma" else "Тираж Водолазов" if card_name == "diver" else "Тираж Сикс Севенов" if card_name == "sixseven" else "Тираж Финальных Боссов" if card_name == "finalboss" else "Тираж Троллфейсов" if card_name == "trollface" else "Тираж .exe" if card_name == "exe" else ""
+ card_id = 5 if card_name == "sigma" else 1 if card_name == "diver" else 2 if card_name == "sixseven" else 11 if card_name == "finalboss" else 10 if card_name == "trollface" else 9 if card_name == "exe" else 0
+ text = (
+  "<b>🏆 ГЛОБАЛЬНЫЕ ДОСТИЖЕНИЯ</b>\n\n"
+  f"<blockquote>Фильтр: {pack_name} / {achievement_name}</blockquote>\n\n"
+ )
+ cursor.execute("SELECT reward_xp, reward_indicator, status, reward_stage FROM global_rewards WHERE id = 1 AND reward_name = ?", (card_name + "_cards",))
+ rows = cursor.fetchall()
+ cursor.execute("SELECT SUM(count) FROM user_cards WHERE user_id NOT IN (?, ?) AND card_id = ?", (dev_id, dev_mini_id, card_id))
+ res = cursor.fetchone()[0]
+ dictictictict = {}
+ name_of_especially_this_keyboard_just_for_fun = "global_achievements_" + card_name
+ dictictictict[name_of_especially_this_keyboard_just_for_fun] = InlineKeyboardBuilder()
+ callback_data = "global_achs_by_fpacks" if card_name in ("sigma", "diver", "sixseven") else "global_achs_by_spacks"
+ dictictictict[name_of_especially_this_keyboard_just_for_fun].button(text="Назад", callback_data=callback_data)
+ if rows:
+  for row in rows:
+   reward_xp, reward_indicator, status, reward_stage = row
+   quantity = res if status == 0 else reward_indicator
+   quantity = quantity if quantity != None else 0
+   text += (
+    f"<b>{achievement_name} —  Уровень {reward_stage}</b>\n"
+    f"<blockquote>Прогресс: {quantity}/{reward_indicator}\n"
+    f"Полная награда: {reward_xp} XP</blockquote>\n\n"
+   )
+ else:
+  text = "Пока что этот раздел <b>пуст</b>, вернитесь позже."
+ await callback.message.edit_text(text=text, reply_markup=dictictictict[name_of_especially_this_keyboard_just_for_fun].as_markup())
+ await callback.answer()
+
+async def setup_v0_1_4(): # СЕТАП ДЛЯ v0.1.4
+ await bot.send_message(chat_id=dev_id, text="Запуск setup v0.1.4...")
+ cursor.execute("INSERT OR IGNORE INTO settings (user_id) SELECT user_id FROM users")
+ db.commit()
+ alters = ["ALTER TABLE users ADD COLUMN pack_stage INTEGER DEFAULT 1","ALTER TABLE users ADD COLUMN fpack_unlocked_cards INTEGER DEFAULT 0","ALTER TABLE users ADD COLUMN spack_unlocked_cards INTEGER DEFAULT 0","ALTER TABLE users ADD COLUMN fpack_progress INTEGER DEFAULT 0","ALTER TABLE users ADD COLUMN spack_progress INTEGER DEFAULT 0","ALTER TABLE users ADD COLUMN total_progress INTEGER DEFAULT 0","ALTER TABLE users ADD COLUMN purchased_special_action INTEGER DEFAULT 0","ALTER TABLE settings ADD COLUMN showing_my_profile INTEGER DEFAULT 1"]
+ for sql in alters:
+  try: cursor.execute(sql)
+  except sqlite3.OperationalError: pass
+ db.commit()
+ cursor.execute("SELECT full_name, purchased_special_action, user_id, fpack_unlocked_cards, spack_unlocked_cards, total_progress, spack_progress FROM users")
+ rows = cursor.fetchall()
+ text = "📊 Список пользователей, приобретших акцию <b>x25 Обычных Наборов Карт за 260 XP</b>\n\n"
+ for row in rows:
+  full_name, purchased, uid, f_unlocked, s_unlocked, t_progress, s_progress = row or (None,0,None,0,0,0)
+  status = "Приобрёл ✅" if purchased == 1 else "Не приобрёл ❌"
+  text += f"{escape(full_name or 'Anon')} — {status}\n"
+  if t_progress >= 50:
+   cursor.execute("UPDATE users SET spack_progress = spack_unlocked_cards * 20 WHERE user_id = ?", (uid,))
+  cursor.execute("UPDATE users SET total_progress = (fpack_unlocked_cards + spack_unlocked_cards) * 10 WHERE user_id = ?", (uid,))
+  if purchased == 1 and get_user_card_count(uid, 6) > 0:
+   if s_unlocked == ((f_unlocked + s_unlocked) * 11) + 11:
+    cursor.execute("UPDATE users SET total_progress = total_progress - 11 WHERE user_id = ?", (uid,))
+ try: await bot.send_message(chat_id=dev_id, text=text)
+ except: pass
+ print(f"Отчёт о покупках акции ({len(rows)} пользователей)")
  cursor.execute("UPDATE users SET purchased_special_action = 0")
  db.commit()
+ cursor.execute("PRAGMA table_info(season_info)")
+ cols = [r[1] for r in cursor.fetchall()]
+ if "season" not in cols:
+  try: cursor.execute("ALTER TABLE season_info ADD COLUMN season INTEGER")
+  except: pass
+ if "winner" not in cols:
+  try: cursor.execute("ALTER TABLE season_info RENAME COLUMN winner_s0 TO winner")
+  except: pass
+  try: cursor.execute("ALTER TABLE season_info ADD COLUMN winner TEXT")
+  except: pass
+ cursor.execute("SELECT COUNT(*) FROM season_info")
+ if cursor.fetchone()[0] == 0:
+  cursor.executemany("INSERT INTO season_info (season, winner) VALUES (?, NULL)",[(0,),(1,),(2,)])
+  cursor.execute("UPDATE season_info SET winner = 'cwendyzz' WHERE season = 0")
+  cursor.execute("UPDATE season_info SET winner = 'Mᴇ Cʀᴀꜰᴛ♡' WHERE season = 1")
+ db.commit()
+ cursor.execute("DROP TABLE IF EXISTS global_rewards")
+ db.commit()
+ cursor.execute("""CREATE TABLE IF NOT EXISTS global_rewards (reward_name TEXT NOT NULL,reward_indicator INTEGER NOT NULL,reward_xp INTEGER NOT NULL,reward_stage INTEGER NOT NULL,status INTEGER DEFAULT 0 NOT NULL,id INTEGER DEFAULT 1 NOT NULL,CONSTRAINT status_check CHECK (status IN (0, 1)),CONSTRAINT stage_check CHECK (reward_stage IN (1, 2, 3, 4, 5)),UNIQUE(id, reward_name, reward_stage))""")
+ db.commit()
+ cursor.execute("SELECT COUNT(*) FROM global_rewards")
+ if cursor.fetchone()[0] == 0:
+  rewards_data = [('total_cards',100,50,1,1),('total_cards',300,150,2,1),('total_cards',500,250,3,1),('total_cards',1000,750,4,0),('sigma_cards',5,200,1,1),('sigma_cards',10,500,2,0),('diver_cards',10,100,1,1),('diver_cards',25,250,2,1),('diver_cards',50,500,3,0),('sixseven_cards',25,50,1,1),('sixseven_cards',50,100,2,1),('sixseven_cards',100,300,3,0),('finalboss_cards',5,375,1,0),('trollface_cards',10,200,1,0),('trollface_cards',25,500,2,0),('exe_cards',25,125,1,0),('exe_cards',50,250,2,0)]
+  cursor.executemany("INSERT INTO global_rewards (reward_name,reward_indicator,reward_xp,reward_stage,status) VALUES (?,?,?,?,?)", rewards_data)
+  db.commit()
+ cursor.execute("CREATE TABLE IF NOT EXISTS useful_info ([максим пидорас 6767] TEXT)")
+ cursor.execute("INSERT OR IGNORE INTO useful_info ([максим пидорас 6767]) VALUES ('да')")
+ db.commit()
+ cursor.execute("SELECT [максим пидорас 6767] FROM useful_info")
+ row = cursor.fetchone()
+ if row and row[0] == 'да':
+  try:
+   await bot.send_message(chat_id=dev2_id,text="<b>⏳ Достаю информацию из БД...</b>\n\nОпираясь на данные из файла <b>archived_database.db</b>, сообщаю, что Максим — пидорас 6767:\n\n<code>максим пидорас 6767 = 'да'</code>")
+   await bot.send_message(chat_id=dev_id,text="✅ Максим успешно получил ваше сообщение.")
+  except: pass
+ cursor.execute("INSERT OR IGNORE INTO season_info (season, winner) VALUES (0, 'cwendyzz'), (1, 'Mᴇ Cʀᴀꜰᴛ♡'), (2, NULL)")
+ cursor.execute("UPDATE season_info SET winner = 'cwendyzz' WHERE season = 0 AND (winner IS NULL OR winner = '')")
+ cursor.execute("UPDATE season_info SET winner = 'Mᴇ Cʀᴀꜰᴛ♡' WHERE season = 1 AND (winner IS NULL OR winner = '')")
+ cursor.execute("UPDATE season_info SET season = 0 WHERE winner = 'cwendyzz'")
+ cursor.execute("UPDATE season_info SET season = 1 WHERE winner = 'Mᴇ Cʀᴀꜰᴛ♡';")
+ cursor.execute("UPDATE card_stats SET first_unlocked = '𔓕 ⊹ ◜⛩️◞  ꩜ すばらしい ꩜ ◜🪽◞ `⌁ ' WHERE card_id = 10")
+ db.commit()
+ await bot.send_message(chat_id=dev_id, text="Setup v0.1.4 полностью завершён")
 
 async def global_rewards_dispatcher(): # ДИСПЕТЧЕР ОБЩИХ ДОСТИЖЕНИЙ И НАГРАД v0.1.3+
+ reward_card_map = {
+  "sigma_cards": 5,
+  "diver_cards": 1,
+  "sixseven_cards": 2,
+  "finalboss_cards": 11,
+  "trollface_cards": 10,
+  "exe_cards": 9
+ }
  while True:
-  cursor.execute("INSERT OR IGNORE INTO global_rewards (id) VALUES (1)")
-  db.commit()
-  cursor.execute("SELECT SUM(total_cards) FROM users WHERE user_id NOT IN (?, ?)", (dev_id, dev_mini_id))
-  row = cursor.fetchone()
-  total_count = row[0] if row else 0
-  xs = [5, 1, 2]
-  for x in xs:
-   cursor.execute("SELECT SUM(count) FROM user_cards WHERE card_id = ? AND user_id NOT IN (?, ?)", (x, dev_id, dev_mini_id))
+  cursor.execute("SELECT reward_name, reward_indicator, reward_xp, reward_stage FROM global_rewards WHERE status = 0 AND id = 1 ORDER BY reward_name, reward_stage")
+  rewards = cursor.fetchall()
+  for reward_name, reward_indicator, reward_xp, reward_stage in rewards:
+   total_reward = reward_name == "total_cards"
+   if not total_reward:
+    card_id = reward_card_map.get(reward_name)
+   if total_reward:
+    cursor.execute("SELECT SUM(total_cards) FROM users WHERE user_id NOT IN (?, ?)", (dev_id, dev_mini_id))
+    name = "Общий Тираж"
+   else:
+    cursor.execute("SELECT SUM(count) FROM user_cards WHERE card_id = ? AND user_id NOT IN (?, ?)", (card_id, dev_id, dev_mini_id))
    row = cursor.fetchone()
-   if x == 5:
-    sigma_count = row[0] if row else 0
-   elif x == 1:
-    diver_count = row[0] if row else 0
-   elif x == 2:
-    sixseven_count = row[0] if row else 0
-  for i in range(1, 12):
-   if i == 1:
-    what_to_find = "total_cards_st1"
-    goal_name = "Общий Тираж — Уровень 1"
-    count = total_count
-   elif i == 2:
-    what_to_find = "total_cards_st2"
-    goal_name = "Общий Тираж — Уровень 2"
-    count = total_count
-   elif i == 3:
-    what_to_find = "total_cards_st3"
-    goal_name = "Общий Тираж — Уровень 3"
-    count = total_count
-   elif i == 4:
-    what_to_find = "sigma_cards_st1"
-    goal_name = "Тираж Сигм — Уровень 1"
-    count = sigma_count
-   elif i == 5:
-    what_to_find = "sigma_cards_st2"
-    goal_name = "Тираж Сигм — Уровень 2"
-    count = sigma_count
-   elif i == 6:
-    what_to_find = "diver_cards_st1"
-    goal_name = "Тираж Водолазов — Уровень 1"
-    count = diver_count
-   elif i == 7:
-    what_to_find = "diver_cards_st2"
-    goal_name = "Тираж Водолазов — Уровень 2"
-    count = diver_count
-   elif i == 8:
-    what_to_find = "diver_cards_st3"
-    goal_name = "Тираж Водолазов — Уровень 3"
-    count = diver_count
-   elif i == 9:
-    what_to_find = "sixseven_cards_st1"
-    goal_name = "Тираж Сикс Севенов — Уровень 1"
-    count = sixseven_count
-   elif i == 10:
-    what_to_find = "sixseven_cards_st2"
-    goal_name = "Тираж Сикс Севенов — Уровень 2"
-    count = sixseven_count
-   elif i == 11:
-    what_to_find = "sixseven_cards_st3"
-    goal_name = "Тираж Сикс Севенов — Уровень 3"
-    count = sixseven_count
-   cursor.execute(f"SELECT {what_to_find} FROM global_rewards WHERE id = 1")
-   row = cursor.fetchone()
-   achieved = row[0] if row else 0
-   if count is not None and count >= global_rewards_indicators.get(what_to_find) and achieved == 0:
-    cursor.execute(f"UPDATE global_rewards SET {what_to_find} = 1 WHERE {what_to_find} = 0 AND id = 1")
-    if cursor.rowcount == 0:
-     continue
-    db.commit()
-    cursor.execute("SELECT user_id FROM users WHERE user_id NOT IN (?, ?)", (dev_id, dev_mini_id))
-    user_rows = cursor.fetchall()
-    for row_user in user_rows:
-     user_id = row_user[0]
-     cursor.execute("SELECT full_name FROM users WHERE user_id = ?", (user_id,))
+   global_count = row[0] if row and row[0] else 0
+   if not total_reward:
+    card_name = card_names.get(card_id, "???")
+    if card_name  == "Джо Байден.exe":
+     card_name = "exe"
+    elif card_name in ("Сигма Джо Байден", "Водолаз Джо Байден", "Сикс Севен Джо Байден", "Финальный Босс Джо Байден", "Троллфейс Джо Байден"):
+     card_name = card_name.replace(" Джо Байден", "")
+    if card_name == "Финальный Босс":
+     card_name = "Финальных Боссов"
+    elif card_name.endswith(("н", "з", "с")):
+     card_name += "ов"
+    elif card_name.endswith("а"):
+     card_name = card_name[:-1]
+    name = f"Тираж {card_name}"
+   if global_count < reward_indicator:
+    continue
+   cursor.execute("UPDATE global_rewards SET status = 1 WHERE reward_name = ? AND reward_stage = ? AND status = 0", (reward_name, reward_stage))
+   if cursor.rowcount == 0:
+    continue
+   db.commit()
+   goal_name = f"{name} — Уровень {reward_stage}"
+   cursor.execute("SELECT user_id, full_name, total_cards FROM users WHERE user_id NOT IN (?, ?)", (dev_id, dev_mini_id))
+   users = cursor.fetchall()
+   for user_id, nickname, total_cards in users:
+    if total_reward:
+     player_count = total_cards or 0
+    else:
+     cursor.execute("SELECT count FROM user_cards WHERE user_id = ? AND card_id = ?", (user_id, card_id))
      row = cursor.fetchone()
-     nickname = row[0] if row else 0
-     if i in (1, 2, 3):
-      cursor.execute("SELECT total_cards FROM users WHERE user_id = ?", (user_id,))
-      row = cursor.fetchone()
-      player_count = row[0] if row else 0
-     else:
-      if i in (4, 5):
-       cursor.execute("SELECT count FROM user_cards WHERE card_id = 5 AND user_id = ?", (user_id,))
-      elif i in (6, 7, 8):
-       cursor.execute("SELECT count FROM user_cards WHERE card_id = 1 AND user_id = ?", (user_id,))
-      elif i in (9, 10, 11):
-       cursor.execute("SELECT count FROM user_cards WHERE card_id = 2 AND user_id = ?", (user_id,))
-      info = cursor.fetchone()
-      if info:
-       player_count = info[0] if info else 0
-      else:
-       player_count = 0
+     player_count = row[0] if row else 0
+    goal_percentage = min(1, player_count / global_count) if global_count else 0
+    earned_xp = int(reward_xp * goal_percentage)
+    if earned_xp <= 0:
+     continue
+    text = f"{escape(nickname)}, поздравляем с выполнением глобального достижения <b>{goal_name}</b>! Вам начислено <b>{earned_xp} XP</b>. Вы смогли набрать <b>{int(goal_percentage * 100)}%</b> от общей цели, собрав <b>{player_count}</b> из <b>{reward_indicator}</b> необходимых карт!"
+    if goal_percentage != 0:
      try:
-      goal_percentage = min(1, (player_count / count))
-     except (ZeroDivisionError, TypeError):
-      goal_percentage = 0
-     earned_xp = min(global_rewards.get(what_to_find), int(global_rewards.get(what_to_find) * goal_percentage))
-     text = (
-      f"{escape(nickname)}, в честь достижения цели <b>{goal_name}</b> Вы получили <b>{earned_xp} XP</b>, достигнув <b>{int(goal_percentage * 100)}%</b> всей цели с получёнными <b>{player_count} требованными картами!</b>"
-     )
-     cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (earned_xp, user_id))
-     if goal_percentage != 0:
-      try:
-       await bot.send_message(chat_id=user_id, text=text)
-      except TelegramAPIError as e:
-       print(f"Не удалось отправить награду пользователю {user_id}: {e}")
-      await asyncio.sleep(0.1)
-     db.commit()
+      await bot.send_message(chat_id=user_id, text=text)
+      cursor.execute("UPDATE users SET xp = xp + ? WHERE user_id = ?", (earned_xp, user_id))
+     except TelegramAPIError as e:
+      print(f"Ошибка при отправке награды для {user_id}: {e}")
+    await asyncio.sleep(0.1)
+   db.commit()
   await asyncio.sleep(5)
 
 async def season_dispatcher(): # ДИСПЕТЧЕР СЕЗОНОВ v0.1.2+
@@ -670,10 +744,14 @@ async def season_dispatcher(): # ДИСПЕТЧЕР СЕЗОНОВ v0.1.2+
      count_after = cursor.fetchone()[0]
      cursor.execute("UPDATE users SET last_card_time = ? WHERE user_id = ?", (prev_time, user[1]))
      db.commit()
-     cursor.execute("UPDATE season_info SET winner_s1 = ?", (user[0],))
+     cursor.execute("UPDATE season_info SET winner = ? WHERE season = 2", (user[0],))
      db.commit()
-     if count_after == 10 and count_before == 9:
-      text = "Вы собрали абсолютно полную коллекцию Джо Байденов, включая эксклюзивы!\nПоследней нужной картой стал <b>Пожизненный Водолаз Джо Байден</b>.\n\nВы можете просмотреть обновлённый лидерборд с вашим ником используя /leaderboard."
+     if count_after == full_coll + 1 and count_before == full_coll:
+      text = (
+       f"<b>{escape(user[0])}</b>, вы собрали <b>абсолютно полную коллекцию Джо Байденов</b> из <b>11 карт</b>! Теперь вы официально прошли <b>Joe Biden Cards и ваш общий достигнутый <b>прогресс равен 100%</b>!\n\n"
+       "Поскольку бот активно обновляется и выходят новые карты, с целью баланса мы не можем выдать вам какую-либо награду, но знайте, <b>ваше имя</b> уже записано в <b>истории проекта!</b>\n\n"
+       "Продолжайте играть, дожидаться новых обновлений и соревноваться за топ-1 мира!"
+      )
       await bot.send_message(chat_id=user[1], text=text)
    cursor.execute("SELECT full_name, user_id, xp, pack_stage FROM users WHERE user_id NOT IN (?, ?) ORDER BY xp DESC LIMIT 1 OFFSET 1", (dev_id, dev_mini_id)) # ВЫДАЧА НАГРАДЫ ТОП 2 МИРА
    row = cursor.fetchone()
@@ -723,6 +801,35 @@ async def season_dispatcher(): # ДИСПЕТЧЕР СЕЗОНОВ v0.1.2+
    await asyncio.sleep(6)
   await asyncio.sleep(1)
 
+@dp.message(Command("settings_info")) # АДМИН КОМАНДА v0.1.4+
+async def showing_settings_info_from_db(message: types.Message):
+ user_id = message.from_user.id
+ if user_id not in [dev_id, dev2_id, dev_mini_id]:
+  text = "У вас недостаточно прав для использования команды /settings_info."
+  await message.answer(text)
+  return
+ cursor.execute("SELECT user_id FROM users")
+ ids = [row[0] for row in cursor.fetchall()]
+ text = "<b>ИНФОРМАЦИЯ О НАСТРОЙКАХ</b>\n\n"
+ for id in ids:
+  cursor.execute("SELECT openings_per_time, showing_prefixes, showing_my_profile FROM settings WHERE user_id = ?", (id,))
+  row = cursor.fetchone()
+  oppeti, shpr, shmypr = row if row else (0, 0, 0)
+  cursor.execute("SELECT username FROM users WHERE user_id = ?", (id,))
+  row = cursor.fetchone()
+  us = row[0] if row else 0
+  shpr = "✅" if shpr == 1 else "❌"
+  shmypr = "✅" if shmypr == 1 else "❌"
+  link_formatting_start = f"<a href='https://t.me/{us}'>" if us != "Anon" else f"<a href='tg://user?id={id}'>"
+  link_formatting_end = "</a>"
+  text += (
+   f"<b>{link_formatting_start}ID: {id}{link_formatting_end}</b>\n"
+   f"<blockquote>Открытие карт за раз: {oppeti}\n"
+   f"Отображение префиксов: {shpr}\n"
+   f"Отображение моего профиля: {shmypr}</blockquote>\n\n"
+  )
+ await message.answer(text, disable_web_page_preview=True)
+
 @dp.message(Command("all_info"))  # АДМИН КОМАНДА v0.1.1.3+
 async def showing_db_info(message: types.Message):
  user_id = message.from_user.id
@@ -744,22 +851,8 @@ async def showing_db_info(message: types.Message):
   cursor.execute("SELECT showing_prefixes FROM settings WHERE user_id = ?", (user_id,))
   row = cursor.fetchone()
   showing_prefixes = row[0] if row else 0
-  cursor.execute("SELECT user_id FROM users WHERE user_id NOT IN (?, ?) ORDER BY xp DESC LIMIT 3",(dev_id, dev_mini_id))
-  rows = cursor.fetchall()
-  top_ids = [r[0] for r in rows]
-  while len(top_ids) < 3:
-   top_ids.append(0)
   if showing_prefixes == 1:
-   if id in (dev_id, dev_mini_id):
-    status = "[DEV] "
-   elif id == top_ids[0]:
-    status = "[🥇] "
-   elif id == top_ids[1]:
-    status = "[🥈] "
-   elif id == top_ids[2]:
-    status = "[🥉] "
-   else:
-    status = ""
+   status = prefixes_selection(id)
   else:
    status = ""
   text += (
@@ -779,12 +872,8 @@ async def showing_db_info(message: types.Message):
    card_name = card_names.get(i, f"Карта не найдена")
    if get_user_card_count(id, i) > 0:
     text += f"{card_name} — x{get_user_card_count(id, i)}\n"
-  if unlocked_cards <= 9 and get_user_card_count(id, 6) == 0:
-   text += f"</blockquote>\nВсего: {total_cards} карт | Открыто: {unlocked_cards}/9"
-  elif unlocked_cards <= 9 and get_user_card_count(id, 6) >= 1:
-   text += f"</blockquote>\nВсего: {total_cards} карт | Открыто: {unlocked_cards}/10"
-  elif unlocked_cards == 10:
-   text += f"</blockquote>\nВсего: {total_cards} карт | Открыто: {unlocked_cards}/10"
+  how_much_is_needed = full_coll if unlocked_cards <=9 and get_user_card_count(id, 6) == 0 else full_coll + 1
+  text += f"</blockquote>\nВсего: {total_cards} карт | Открыто: {unlocked_cards}/{how_much_is_needed}"
   text += f"\nОбычные Наборы Карт: {fpacks}"
   text += f"\nРасширенные Наборы Карт: {spacks}"
   text += f"\nПоследнее открытие: {datetime.fromtimestamp(last_card_time).date()}"
@@ -812,31 +901,37 @@ async def broadcast(message: types.Message):
   await message.answer(text)
   return
  text = (
-  "<b>⚡️ ОБНОВЛЕНИЕ v0.1.3 ВЫШЛО!</b>\n\n"
+  "<b>⚡️ ОБНОВЛЕНИЕ v0.1.4 ВЫШЛО!</b>\n\n"
   "Новое:\n"
-  "<blockquote>— Добавлен расширенный набор карт с 4 видами карт внутри.\n"
-  "— Внедрена система стадий прохождения игры. Прогресс теперь дозируется: на первой стадии доступны только <b>Обычные Наборы</b>, после завершения открывается вторая стадия с доступом к <b>Расширенному Набору</b>.\n"
-  "— Добавлен общий счётчик прохождения игры.\n"
-  "— Запущена система глобальных достижений. Игроки набирают определённый тираж конкретных карт, после чего все получают награды в зависимости от личного вклада. На данный момент доступно 4 вида достижений с <b>самыми редкими картами в игре</b>, а также по общему тиражу. Все глобальные достижения можно посмотреть через инлайн-кнопку в лидерборде.\n"
-  "— Полностью переработана команда /profile. Теперь она работает как RP-команда (требует аргумент при вводе) и поддерживает как <b>Telegram-ID</b>, так и <b>юзернеймы</b>.\n"
-  "— Добавлена команда /settings с тремя настройками: <b>количество одновременно открываемых наборов</b>, <b>отображение префиксов</b> и <b>раздел контрибьюторов</b>.</blockquote>\n\n"
+  "<blockquote>— Добавлена новая карта <b>Финальный Босс Джо Байден</b> с шансом 1% из <b>Расширенного набора</b>.\n"
+  "— Переработана система глобальных достижений: весь интерфейс перенесён в новую команду <b>/achievements</b>. Теперь все достижения удобно просматриваются с помощью фильтров, навигации и инлайн-кнопок.\n"
+  "— Добавлено 6 новых достижений, включая <b>«Общий Тираж — Уровень 4»</b> и первые уровни тиража для карт <b>Расширенного Набора</b>.\n"
+  "— В лидербордах ники игроков теперь являются кликабельными ссылками на их Telegram-профили.\n"
+  "— Полностью переработано меню настроек: теперь /settings использует удобное инлайн-меню с мгновенным применением изменений, похожее на /achievements.\n"
+  "— Добавлена новая настройка <b>«Отображение моего профиля»</b>, а также опция открытия 5 наборов за раз.\n"
+  "— Добавлена административная команда <b>/settings_info</b> для просмотра личных настроек игроков.</blockquote>\n\n"
   "QoL:\n"
-  "<blockquote>— Добавлены префиксы <b>[NEW]</b> для карт, которые игрок выбил впервые.\n"
-  "— Добавлены уникальные префиксы для игроков: <b>[DEV]</b>, <b>[🥇]</b>, <b>[🥈]</b>, <b>[🥉]</b>.</blockquote>\n\n"
+  "<blockquote>— Актуализированы текстовые напоминания — названия карт и наборов теперь соответствуют стадии игрока.\n"
+  "— Новые показатели в лидерборде достижений.\n"
+  "— Команда /card теперь сразу показывает набор, соответствующий текущей стадии игрока.\n"
+  "— Неизвестные карты в предпросмотре набора теперь отображаются как <b>???</b>.</blockquote>\n\n"
   "Изменения баланса:\n"
-  "<blockquote>— Уменьшено количество опыта за <b>собрание полной коллекции карт обычного набора</b>: 250 XP → 50 XP.\n"
-  "— Изменены награды за <b>открытие карт первыми в мире</b>: теперь вместо опыта игроки получают наборы соответствующей стадии в количестве от 1 до 5 (в зависимости от редкости карты).\n"
-  "— После прохождения стадии опыт за <b>открытие карт из уже завершённой стадии</b> уменьшен в два раза.\n"
-  "— Улучшены награды за итоговые места в сезоне: <b>1 место</b> — x1 Пожизненный Водолаз Джо Байден + 5 текущих наборов карт; <b>2 место</b> — 5 текущих наборов карт; <b>3 место</b> — 3 текущих набора карт; <b>остальные места</b> — 1 текущий набор карт.\n"
-  "— Увеличена базовая стоимость <b>Обычных Наборов Карт</b> в магазине: 10 XP → 15 XP.</blockquote>\n\n"
+  "<blockquote>— Увеличены награды за <b>«Тираж Сигма — Уровень 2»</b> (400 → 500 XP) и <b>«Тираж Сикс Севен — Уровень 3»</b> (200 → 300 XP)\n"
+  "— Уменьшен шанс выпадения <b>Троллфейса Джо Байдена</b> (5% → 4%).</blockquote>\n\n"
+  "Исправления багов:\n"
+  "<blockquote>— Исправлен баг, из-за которого подсчет общего прогресса у владельцев <b>Пожизненного Водолаза Джо Байдена</b> происходил неверно.\n"
+  "— Исправлен визуальный баг, из-за которого у новых игроков стадия была равна 0.\n"
+  "— Исправлен баг, из-за которого игрок, первым открывший <b>Троллфейса Джо Байдена</b>, не отображался в лидерборде достижений.\n"
+  "— Исправлено множество мелких визуальных и функциональных ошибок.</blockquote>\n\n"
   "Техническое:\n"
-  "<blockquote>— Значительная оптимизация кода и рефакторинг базы данных.</blockquote>\n\n"
-  "В честь выхода обновления команда /claim была возвращена. Теперь по ней можно забрать <b>x5 Обычных Наборов Карт</b> или <b>x3 Расширенных Наборов Карт</b> в зависимости от текущей стадии."
+  "<blockquote>— Значительная оптимизация кода.\n"
+  "— Миграция базы данных.</blockquote>\n\n"
+  "В честь выхода обновления <b>КД всех наборов</b> уменьшен на <b>20%</b> до этого воскресенья."
  )
  cursor.execute("SELECT user_id FROM users")
  rows = cursor.fetchall()
  count = 0
- if int(time.time()) < 1781631002:
+ if int(time.time()) < 1782464400:
   await message.answer("🚀 Рассылка запущена..")
   for row in rows:
    user_id = row[0]
@@ -892,9 +987,9 @@ async def gift_claiming(message: types.Message):
 async def showing_market(message: types.Message):
  global season, season_start, season_end, season_desc, season_duration
  user_id = message.from_user.id
- cursor.execute("SELECT pack_stage, purchased_special_action FROM users WHERE user_id = ?", (user_id,))
+ cursor.execute("SELECT pack_stage FROM users WHERE user_id = ?", (user_id,))
  row = cursor.fetchone()
- pack_stage, did_purchase = row if row else (0, 0)
+ pack_stage = row[0] if row else 0
  left_before_s_end = season_end - time.time()
  if 86400 >= left_before_s_end > 0:
   h = int(left_before_s_end // 3600)
@@ -917,12 +1012,6 @@ async def showing_market(message: types.Message):
    market_purchase_selection.button(text="x1 Расширенный Набор Карт", callback_data="one_spack_purchase")
    market_purchase_selection.button(text="x10 Расширенных Наборов Карт", callback_data="ten_spacks_purchase")
   text += "</blockquote>"
-  if did_purchase == 0:
-   text += (
-    "\n\nОсобые акции:"
-    "\n<blockquote>🃏 <b>x25 Обычных Наборов Карт</b> — <s>375</s> 260 XP (-30%)</blockquote>"
-   )
-   market_purchase_selection.button(text="x25 Обычных Наборов Карт (одноразовая)", callback_data="global_achs_boost_purchase")
   text += "\n\nВыберите акцию для покупки"
   market_purchase_selection.adjust(1)
   await message.answer(text, reply_markup=market_purchase_selection.as_markup())
@@ -935,140 +1024,23 @@ async def showing_market(message: types.Message):
 
 @dp.callback_query(F.data == "one_fpack_purchase")
 async def processing_one_fpack_purchase(callback: CallbackQuery):
- global season, season_start, season_end, season_desc, season_duration
- left_before_s_end = season_end - time.time()
- if 86400 >= left_before_s_end > 0:
-  user_id = callback.from_user.id
-  cursor.execute("SELECT xp FROM users WHERE user_id = ?", (user_id,))
-  row = cursor.fetchone()
-  xp = row[0] if row else 0
-  if xp >= 15:
-   cursor.execute("UPDATE users SET xp = xp - 15, fpacks = fpacks + 1 WHERE user_id = ?", (user_id,))
-   db.commit()
-   text = "Вы успешно приобрели <b>x1 Обычный Набор Карт</b> за 15 XP"
-   await callback.message.answer(text)
-  else:
-   text = "Недостаточно XP для покупки. Попробуйте позже."
-   await callback.message.answer(text)
-  await callback.answer()
- else:
-  left_before_m_appear = left_before_s_end - 86400
-  d = int(left_before_m_appear // 86400)
-  h = int((left_before_m_appear % 86400) // 3600)
-  text = f"🚫 Временный маркет закрыт. До его появления осталось {d}д {h}ч"
-  await callback.message.answer(text)
-  await callback.answer()
+ await market_purchase(callback, 15, 1, "fpacks", False)
 
 @dp.callback_query(F.data == "ten_fpacks_purchase")
 async def processing_ten_fpacks_purchase(callback: CallbackQuery):
- global season, season_start, season_end, season_desc, season_duration
- left_before_s_end = season_end - time.time()
- if 86400 >= left_before_s_end > 0:
-  user_id = callback.from_user.id
-  cursor.execute("SELECT xp FROM users WHERE user_id = ?", (user_id,))
-  row = cursor.fetchone()
-  xp = row[0] if row else 0
-  if xp >= 125:
-   cursor.execute("UPDATE users SET xp = xp - 125, fpacks = fpacks + 10 WHERE user_id = ?", (user_id,))
-   db.commit()
-   text = "Вы успешно приобрели <b>x10 Обычных Наборов Карт</b> за 125 XP"
-   await callback.message.answer(text)
-  else:
-   text = "Недостаточно XP для покупки. Попробуйте позже."
-   await callback.message.answer(text)
-  await callback.answer()
- else:
-  left_before_m_appear = left_before_s_end - 86400
-  d = int(left_before_m_appear // 86400)
-  h = int((left_before_m_appear % 86400) // 3600)
-  text = f"🚫 Временный маркет закрыт. До его появления осталось {d}д {h}ч"
-  await callback.message.answer(text)
-  await callback.answer()
+ await market_purchase(callback, 125, 10, "fpacks", False)
 
 @dp.callback_query(F.data == "one_spack_purchase")
 async def processing_one_spack_purchase(callback: CallbackQuery):
- global season, season_start, season_end, season_desc, season_duration
- left_before_s_end = season_end - time.time()
- if 86400 >= left_before_s_end > 0:
-  user_id = callback.from_user.id
-  cursor.execute("SELECT xp FROM users WHERE user_id = ?", (user_id,))
-  row = cursor.fetchone()
-  xp = row[0] if row else 0
-  if xp >= 25:
-   cursor.execute("UPDATE users SET xp = xp - 25, spacks = spacks + 1 WHERE user_id = ?", (user_id,))
-   db.commit()
-   text = "Вы успешно приобрели <b>x1 Расширенный Набор Карт</b> за 25 XP"
-   await callback.message.answer(text)
-  else:
-   text = "Недостаточно XP для покупки. Попробуйте позже."
-   await callback.message.answer(text)
-  await callback.answer()
- else:
-  left_before_m_appear = left_before_s_end - 86400
-  d = int(left_before_m_appear // 86400)
-  h = int((left_before_m_appear % 86400) // 3600)
-  text = f"🚫 Временный маркет закрыт. До его появления осталось {d}д {h}ч"
-  await callback.message.answer(text)
-  await callback.answer()
+ await market_purchase(callback, 25, 1, "spacks", False)
 
 @dp.callback_query(F.data == "ten_spacks_purchase")
 async def processing_ten_spacks_purchase(callback: CallbackQuery):
- global season, season_start, season_end, season_desc, season_duration
- left_before_s_end = season_end - time.time()
- if 86400 >= left_before_s_end > 0:
-  user_id = callback.from_user.id
-  cursor.execute("SELECT xp FROM users WHERE user_id = ?", (user_id,))
-  row = cursor.fetchone()
-  xp = row[0] if row else 0
-  if xp >= 210:
-   cursor.execute("UPDATE users SET xp = xp - 210, spacks = spacks + 10 WHERE user_id = ?", (user_id,))
-   db.commit()
-   text = "Вы успешно приобрели <b>x10 Расширенных Наборов Карт</b> за 210 XP"
-   await callback.message.answer(text)
-  else:
-   text = "Недостаточно XP для покупки. Попробуйте позже."
-   await callback.message.answer(text)
-  await callback.answer()
- else:
-  left_before_m_appear = left_before_s_end - 86400
-  d = int(left_before_m_appear // 86400)
-  h = int((left_before_m_appear % 86400) // 3600)
-  text = f"🚫 Временный маркет закрыт. До его появления осталось {d}д {h}ч"
-  await callback.message.answer(text)
-  await callback.answer()
+ await market_purchase(callback, 210, 10, "spacks", False)
 
 @dp.callback_query(F.data == "global_achs_boost_purchase")
 async def processing_global_achs_boost_purchase(callback: CallbackQuery):
- global season, season_start, season_end, season_desc, season_duration
- user_id = callback.from_user.id
- left_before_s_end = season_end - time.time()
- cursor.execute("SELECT purchased_special_action FROM users WHERE user_id = ?", (user_id,))
- row = cursor.fetchone()
- did_purchase = row[0] if row else 0
- if 86400 >= left_before_s_end > 0 and did_purchase == 0:
-  cursor.execute("SELECT xp FROM users WHERE user_id = ?", (user_id,))
-  row = cursor.fetchone()
-  xp = row[0] if row else 0
-  if xp >= 260:
-   cursor.execute("UPDATE users SET xp = xp - 260, fpacks = fpacks + 25, purchased_special_action = 1 WHERE user_id = ?", (user_id,))
-   db.commit()
-   text = "Вы успешно приобрели одноразовую акцию <b>x25 Обычных Наборов Карт</b> за 260 XP"
-   await callback.message.answer(text)
-   await asyncio.sleep(0.5)
-  else:
-   text = "Недостаточно XP для покупки. Попробуйте позже."
-   await callback.message.answer(text)
- elif 86400 >= left_before_s_end > 0 and did_purchase == 1:
-  text = f"Вы уже приобрели эту акцию."
-  await callback.message.answer(text)
- else:
-  left_before_m_appear = left_before_s_end - 86400
-  d = int(left_before_m_appear // 86400)
-  h = int((left_before_m_appear % 86400) // 3600)
-  text = f"🚫 Временный маркет закрыт. До его появления осталось {d}д {h}ч"
-  await callback.message.answer(text)
- print(did_purchase)
- await callback.answer()
+ await market_purchase(callback, 260, 25, "fpacks", True)
 
 @dp.message(Command("leaderboard")) # СПИСОК ЛИДЕРОВ v0.1+
 async def show_leaderboard(message: types.Message):
@@ -1078,7 +1050,7 @@ async def show_leaderboard(message: types.Message):
 @dp.callback_query(F.data == "season_leaderboard") # Сезонный лидерборд
 async def handle_season_leaderboard(callback: CallbackQuery):
  global season, season_start, season_end, season_desc, season_duration
- cursor.execute("SELECT full_name, xp FROM users WHERE user_id NOT IN (?, ?) ORDER BY XP DESC LIMIT 5", (dev_id, dev_mini_id))
+ cursor.execute("SELECT full_name, xp, user_id, username FROM users WHERE user_id NOT IN (?, ?) ORDER BY XP DESC LIMIT 5", (dev_id, dev_mini_id))
  users = cursor.fetchall()
  results = "<b>🏆 СЕЗОННЫЙ ЛИДЕРБОРД</b>\n"
  left_before_s_end = max(0, int(season_end - time.time()))
@@ -1105,109 +1077,249 @@ async def handle_season_leaderboard(callback: CallbackQuery):
  for user in users:
   medal = "👑" if rank == 1 else f"{rank}"
   dot = "" if rank == 1 else "."
-  results += f"{medal}{dot} {escape(user[0])} — {user[1]} XP\n"
+  cursor.execute("SELECT showing_my_profile FROM settings WHERE user_id = ?", (user[2],))
+  show_my_tg_profile = cursor.fetchone()[0]
+  link_start = f"<a href='https://t.me/{user[3]}'>" if show_my_tg_profile == 1 else ""
+  link_end = "</a>" if show_my_tg_profile == 1 else ""
+  results += f"{link_start}{medal}{dot} {escape(user[0])} — {user[1]} XP{link_end}\n"
   rank += 1
  cursor.execute("SELECT SUM(total_cards) FROM users WHERE user_id NOT IN (?, ?)", (dev_id, dev_mini_id))
  row = cursor.fetchone()
  total_cards = row[0] if row and row[0] else 0
  results += f"\nВсего карточек существует: {total_cards}\n\n"
- await callback.message.answer(results) 
+ await callback.message.answer(results, disable_web_page_preview=True) 
  await callback.answer()
 
-@dp.callback_query(F.data == "records_leaderboard") # Лидерборд достижений
+@dp.callback_query(F.data == "records_leaderboard")
 async def handle_records_leaderboard(callback: CallbackQuery):
- global season, season_start, season_end, season_desc, season_duration
- cursor.execute("SELECT full_name FROM users WHERE unlocked_cards = 9 AND user_id NOT IN (?, ?)", (dev_id, dev_mini_id))
- users_with9 = cursor.fetchall()
- cursor.execute("SELECT full_name FROM users WHERE unlocked_cards = 10 AND user_id NOT IN (?, ?)", (dev_id, dev_mini_id))
+ cursor.execute("SELECT full_name, username FROM users WHERE fpack_unlocked_cards = 5 AND spack_unlocked_cards = 5 AND user_id NOT IN (?, ?)", (dev_id, dev_mini_id))
  users_with10 = cursor.fetchall()
- cursor.execute("SELECT COUNT(*) FROM users WHERE unlocked_cards = 9 AND user_id NOT IN (?, ?)", (dev_id, dev_mini_id))
- users_with_full_coll9 = cursor.fetchone()[0] or 0
- cursor.execute("SELECT COUNT(*) FROM users WHERE unlocked_cards = 10 AND user_id NOT IN (?, ?)", (dev_id, dev_mini_id))
+ cursor.execute("SELECT full_name, username FROM users WHERE unlocked_cards = ? AND user_id NOT IN (?, ?)", (full_coll, dev_id, dev_mini_id))
+ users_with11 = cursor.fetchall()
+ cursor.execute("SELECT COUNT(*) FROM users WHERE fpack_unlocked_cards = 5 AND spack_unlocked_cards = 5 AND user_id NOT IN (?, ?)", (dev_id, dev_mini_id))
  users_with_full_coll10 = cursor.fetchone()[0] or 0
+ cursor.execute("SELECT COUNT(*) FROM users WHERE unlocked_cards = ? AND user_id NOT IN (?, ?)", (full_coll + 1, dev_id, dev_mini_id))
+ users_with_full_coll11 = cursor.fetchone()[0] or 0
+
  results = "<b>🏆 ЛИДЕРБОРД ДОСТИЖЕНИЙ</b>"
- if users_with9:
-  names_9 = [escape(u[0]) for u in users_with9]
-  results += "\n\nПолная коллекция (9/9):\n" + ", ".join(names_9)
-  results += f"\nВсего игроков: {users_with_full_coll9}"
+
  if users_with10:
-  names_10 = [escape(u[0]) for u in users_with10]
-  results += "\n\nПолная коллекция (10/10):\n" + ", ".join(names_10)
-  results += f"\nВсего игроков: {users_with_full_coll10}"
- cursor.execute("SELECT winner_s0 FROM season_info")
- row = cursor.fetchone()
- the_winner_s0 = row[0] if row and row[0] is not None else "None"
- if the_winner_s0:
-  results += (
-   "\n\nПобедители сезонов:"
-   f"\n<blockquote>{escape(the_winner_s0)} — топ-1 мира в досезонном периоде</blockquote>"
-  ) 
- results += (
-  "\n\n<b>АРХИВИРОВАННЫЕ ДОСТИЖЕНИЯ</b>"
-  "\n\nПервооткрыватели:"
-  "\n<blockquote>Victony Universal — первый в мире <b>Открытый Набор</b> (23.04)"
- )
+  names_10 = [f"<a href='https://t.me/{u[1]}'>{escape(u[0])}</a>" for u in users_with10]
+  results += "\n\nПолная коллекция (10/10):\n<blockquote>" + ", ".join(names_10) + f"</blockquote>\nВсего игроков: {users_with_full_coll10}"
+ if users_with11:
+  names_11 = [f"<a href='https://t.me/{u[1]}'>{escape(u[0])}</a>" for u in users_with11]
+  results += "\n\nПолная коллекция (11/11):\n<blockquote>" + ", ".join(names_11) + f"</blockquote>\nВсего игроков: {users_with_full_coll11}"
+
+ cursor.execute("SELECT winner, season FROM season_info WHERE winner IS NOT NULL ORDER BY season")
+ winners = cursor.fetchall()
+ if winners:
+  results += "\n\nПобедители сезонов:\n<blockquote>"
+  seen = set()
+  for w_name, w_season in winners:
+   if not w_name or w_name in seen: continue
+   seen.add(w_name)
+   try:
+    w_season = int(w_season)
+   except:
+    w_season = -1
+   if w_season == 0:
+    season_text = "нулевого"
+   elif w_season == 1:
+    season_text = "первого"
+   elif w_season == 2:
+    season_text = "второго"
+   else:
+    season_text = "неизвестного"
+   
+   cursor.execute("SELECT user_id FROM users WHERE full_name = ?", (w_name,))
+   row = cursor.fetchone()
+   uid = row[0] if row else None
+   link_start = link_end = ""
+   if uid:
+    cursor.execute("SELECT showing_my_profile FROM settings WHERE user_id = ?", (uid,))
+    show_row = cursor.fetchone()
+    show = show_row[0] if show_row else 0
+    if show == 1:
+     cursor.execute("SELECT username FROM users WHERE full_name = ?", (w_name,))
+     us_row = cursor.fetchone()
+     us = us_row[0] if us_row else None
+     if us:
+      link_start = f"<a href='https://t.me/{us}'>"
+      link_end = "</a>"
+   results += f"{link_start}{escape(w_name)}{link_end} — топ-1 мира {season_text} сезона\n"
+  results += "</blockquote>"
+ achievers = ['Victony Universal', 'Mᴇ Cʀᴀꜰᴛ♡', 'cwendyzz', 'Mᴇ Cʀᴀꜰᴛ♡', '𔓕 ⊹ ◜⛩️◞  ꩜ すばらしい ꩜ ◜🪽◞ `⌁']
+ achievements = ['первый в мире <b>Открытый Обычный Набор</b> (23.04)', 'первый в мире <b>Открытый Расширенный Набор</b>', 'первая в мире <b>полная коллекция 4/4</b> (26.04)', 'первая в мире <b>полная коллекция 5/5</b> (08.06)', 'первая в мире <b>полная коллекция 9/9</b> (21.06)']
+ results += "\n<b>АРХИВИРОВАННЫЕ ДОСТИЖЕНИЯ</b>\n\nПервооткрыватели:\n<blockquote>"
+ for nickname, achievement in zip(achievers, achievements):
+  cursor.execute("SELECT username, user_id FROM users WHERE full_name = ?", (nickname,))
+  row = cursor.fetchone()
+  us, idd = row if row else (None, 0)
+  cursor.execute("SELECT showing_my_profile FROM settings WHERE user_id = ?", (idd,))
+  row = cursor.fetchone()
+  show = row[0] if row else 0
+  link_start = f"<a href='https://t.me/{us}'>" if show == 1 and us else ""
+  link_end = "</a>" if show == 1 and us else ""
+  results += f"{link_start}{nickname}{link_end} — {achievement}\n"
  for i in card_drop_diapazones.keys():
   cursor.execute("SELECT first_unlocked FROM card_stats WHERE card_id = ?", (i,))
   row = cursor.fetchone()
   first = row[0] if row else None
-  cursor.execute("SELECT full_name FROM users WHERE user_id = ?", (dev_id,))
+  if not first: continue
+  cursor.execute("SELECT user_id FROM users WHERE full_name = ?", (first,))
   row = cursor.fetchone()
-  dev_name = row[0] if row else 0
-  cursor.execute("SELECT full_name FROM users WHERE user_id = ?", (dev_mini_id,))
+  idd = row[0] if row else 0
+  cursor.execute("SELECT showing_my_profile FROM settings WHERE user_id = ?", (idd,))
   row = cursor.fetchone()
-  dev_mini_name = row[0] if row else 0
-  if first in (dev_name, dev_mini_name):
-   first = None
-  if i in (1, 2, 3, 4, 5, 6):
-   results += f"\n{escape(first)} — первый в мире <b>{card_names.get(i)}</b> ({first_unlocked_date.get(i)})"
-  elif i in (7, 8, 9, 10):
-   try: 
-    results += f"\n{escape(first)} — первый в мире <b>{card_names.get(i)}</b> ({first_unlocked_date.get(i)})"
-   except AttributeError:
-    continue
- results += "\ncwendyzz — первая в мире <b>Полная Коллекция 4/4</b> (26.04)"
- results += "\nMᴇ Cʀᴀꜰᴛ♡ — первая в мире <b>Полная Коллекция 5/5</b> (08.06)</blockquote>"
- await callback.message.answer(results)
+  show = row[0] if row else 0
+  cursor.execute("SELECT username FROM users WHERE user_id = ?", (idd,))
+  us_row = cursor.fetchone()
+  us = us_row[0] if us_row else None
+  link_start = f"<a href='https://t.me/{us}'>" if show == 1 and us else ""
+  link_end = "</a>" if show == 1 and us else ""
+  results += f"{link_start}{escape(first)}{link_end} — первый в мире <b>{card_names.get(i)}</b> ({first_unlocked_date.get(i, '')})\n"
+ results += "</blockquote>"
+
+ await callback.message.answer(results, disable_web_page_preview=True)
  await callback.answer()
 
-@dp.callback_query(F.data == "global_achievements") # Глобальные достижения
-async def handle_global_achievements(callback: CallbackQuery):
- try:
-  cursor.execute("ALTER TABLE global_rewards ADD COLUMN id INTEGER DEFAULT 1")
-  db.commit()
- except sqlite3.OperationalError:
-  print("Столбец id уже существует.")
- results = "<b>ГЛОБАЛЬНЫЕ ДОСТИЖЕНИЯ</b>\n\n"
- cursor.execute("SELECT total_cards_st1, total_cards_st2, total_cards_st3, sigma_cards_st1, sigma_cards_st2, diver_cards_st1, diver_cards_st2, diver_cards_st3, sixseven_cards_st1, sixseven_cards_st2, sixseven_cards_st3 FROM global_rewards WHERE id = 1")
+@dp.message(Command("achievements")) # КОМАНДА ГЛОБАЛЬНЫХ ДОСТИЖЕНИЙ v0.1.4+
+async def handle_global_achievements(event: types.Message | CallbackQuery):
+ cursor.execute("SELECT COUNT(*), SUM(reward_xp) FROM global_rewards WHERE status = 1")
+ row = cursor.fetchone()
+ completed_already, gave_away_already = row if row else (0, 0)
+ text = (
+ "<b>🏆 ГЛОБАЛЬНЫЕ ДОСТИЖЕНИЯ</b>\n\n"
+ "<blockquote>Здесь вы можете просмотреть информацию о всех глобальных достижениях в боте или отследить их прогресс. Используйте навигацию в виде инлайн-кнопок, чтобы перейти к нужному разделу.</blockquote>\n\n"
+ f"Всего выполнено: {completed_already}/17\n"
+ f"Всего получено: {gave_away_already}/4650 XP\n\n"
+ "Выберите фильтр для просмотра глобальных достижений."
+ )
+ global_achievements_inl = InlineKeyboardBuilder()
+ global_achievements_inl.button(text="Общие", callback_data="global_achs_by_totals")
+ global_achievements_inl.button(text="Обычный Набор Карт", callback_data="global_achs_by_fpacks")
+ global_achievements_inl.button(text="Расширенный Набор Карт", callback_data="global_achs_by_spacks")
+ global_achievements_inl.adjust(1)
+ if isinstance (event, types.Message):
+   await event.answer(text=text, reply_markup=global_achievements_inl.as_markup())
+ elif isinstance (event, CallbackQuery):
+   await event.message.edit_text(text=text, reply_markup=global_achievements_inl.as_markup())
+   await event.answer()
+
+@dp.callback_query(F.data == "global_achs_by_totals")
+async def demonstrating_global_achs_by_totals(callback: CallbackQuery):
+ text = (
+  "<b>🏆 ГЛОБАЛЬНЫЕ ДОСТИЖЕНИЯ</b>\n"
+  "<blockquote>Фильтр: Общий Тираж</blockquote>\n\n"
+ )
+ cursor.execute("SELECT reward_xp, reward_indicator, status, reward_stage FROM global_rewards WHERE id = 1 AND reward_name = 'total_cards'")
  rows = cursor.fetchall()
+ cursor.execute("SELECT SUM(total_cards) FROM users WHERE user_id NOT IN (?, ?)", (dev_id, dev_mini_id))
+ res = cursor.fetchone()[0]
+ global_achievements_totals = InlineKeyboardBuilder()
+ global_achievements_totals.button(text="Назад", callback_data="back_to_global_achs_main_menu")
  if rows:
-  row_data = rows[0]
-  columns = ["total_cards_st1", "total_cards_st2", "total_cards_st3", "sigma_cards_st1", "sigma_cards_st2", "diver_cards_st1", "diver_cards_st2", "diver_cards_st3", "sixseven_cards_st1", "sixseven_cards_st2", "sixseven_cards_st3"]
-  for i, reward_name in enumerate(columns):
-   target = row_data[i]
-   if reward_name in ("total_cards_st1", "total_cards_st2", "total_cards_st3"):
-    cursor.execute("SELECT SUM(total_cards) FROM users WHERE user_id NOT IN (?, ?)", (dev_id, dev_mini_id))
-   elif reward_name in ("sigma_cards_st1", "sigma_cards_st2"):
-    cursor.execute("SELECT SUM(count) FROM user_cards WHERE card_id = 5 AND user_id NOT IN (?, ?)", (dev_id, dev_mini_id))
-   elif reward_name in ("diver_cards_st1", "diver_cards_st2", "diver_cards_st3"):
-    cursor.execute("SELECT SUM(count) FROM user_cards WHERE card_id = 1 AND user_id NOT IN (?, ?)", (dev_id, dev_mini_id))
-   elif reward_name in ("sixseven_cards_st1", "sixseven_cards_st2", "sixseven_cards_st3"):
-    cursor.execute("SELECT SUM(count) FROM user_cards WHERE card_id = 2 AND user_id NOT IN (?, ?)", (dev_id, dev_mini_id))
-   info = cursor.fetchone()
-   count = info[0] if info else 0
-   if target == 1:
-    results += (
-     f"<blockquote><b>🏆 {global_rewards_names.get(reward_name)} — {global_rewards_indicators.get(reward_name)}/{global_rewards_indicators.get(reward_name)}</b>\n"
-     f"Полная награда: {global_rewards.get(reward_name)} XP (получена)</blockquote>\n\n"
-    )
-   else:
-    results += (
-     f"<blockquote><b>{global_rewards_names.get(reward_name)} — {count}/{global_rewards_indicators.get(reward_name)}</b>\n"
-     f"Полная награда: {global_rewards.get(reward_name)} XP</blockquote>\n\n"
-    )
-  await callback.message.answer(results)
-  await callback.answer()
+  for row in rows:
+   reward_xp, reward_indicator, status, reward_stage = row
+   quantity = res if status == 0 else reward_indicator
+   quantity = quantity if quantity != None else 0
+   text += (
+    f"<b>Общий Тираж —  Уровень {reward_stage}</b>\n"
+    f"<blockquote>Прогресс: {quantity}/{reward_indicator}\n"
+    f"Полная награда: {reward_xp} XP</blockquote>\n\n"
+   )
+ else:
+  text = "Пока что этот раздел <b>пуст</b>, вернитесь позже."
+ await callback.message.edit_text(text=text, reply_markup=global_achievements_totals.as_markup())
+ await callback.answer()
+
+@dp.callback_query(F.data == "global_achs_by_fpacks")
+async def demonstrating_global_achs_by_fpacks(callback: CallbackQuery):
+ global_achievements_fpacks = InlineKeyboardBuilder()
+ global_achievements_fpacks.button(text="Тираж Сигм", callback_data="global_achs_by_sigma")
+ global_achievements_fpacks.button(text="Тираж Водолазов", callback_data="global_achs_by_diver")
+ global_achievements_fpacks.button(text="Тираж Сикс Севен", callback_data="global_achs_by_sixseven")
+ global_achievements_fpacks.button(text="Назад", callback_data="back_to_global_achs_main_menu")
+ global_achievements_fpacks.adjust(1)
+ cursor.execute("SELECT COUNT(*), SUM(reward_xp) FROM global_rewards WHERE id = 1 AND status = 1 AND reward_name IN ('sigma_cards', 'diver_cards', 'sixseven_cards')")
+ row = cursor.fetchone()
+ completed_already = row[0] if row else 0
+ gave_away_already = row[1] if row is not None else 0
+ text = (
+ "<b>🏆 ГЛОБАЛЬНЫЕ ДОСТИЖЕНИЯ</b>\n"
+ "<blockquote>Фильтр: Обычный набор карт</blockquote>\n\n"
+ "Доступные опции:\n\n"
+ "<b>Тираж Сигм — 2 уровня</b>\n"
+ "<blockquote>Полная награда: 700 XP</blockquote>\n\n"
+ "<b>Тираж Водолазов — 3 уровня</b>\n"
+ "<blockquote>Полная награда: 850 XP</blockquote>\n\n"
+ "<b>Тираж Сикс Севен — 3 уровня</b>\n"
+ "<blockquote>Полная награда: 450 XP</blockquote>\n\n"
+ f"Выполнено: {completed_already}/8 \n"
+ f"Получено: {gave_away_already}/2000 XP\n\n"
+ "Выберите следующий фильтр для просмотра достижений конкретной карты"
+ )
+ await callback.message.edit_text(text=text, reply_markup=global_achievements_fpacks.as_markup())
+ await callback.answer()
+
+@dp.callback_query(F.data == "global_achs_by_spacks")
+async def demonstrating_global_achs_by_spacks(callback: CallbackQuery):
+ global_achievements_spacks = InlineKeyboardBuilder()
+ global_achievements_spacks.button(text="Тираж Финальных Боссов", callback_data="global_achs_by_finalboss")
+ global_achievements_spacks.button(text="Тираж Троллфейсов", callback_data="global_achs_by_trollface")
+ global_achievements_spacks.button(text="Тираж .exe", callback_data="global_achs_by_.exe")
+ global_achievements_spacks.button(text="Назад", callback_data="back_to_global_achs_main_menu")
+ global_achievements_spacks.adjust(1)
+ cursor.execute("SELECT COUNT(*), SUM(reward_xp) FROM global_rewards WHERE id = 1 AND status = 1 AND reward_name IN ('finalboss_cards', 'trollface_cards', 'exe_cards')")
+ row = cursor.fetchone()
+ completed_already = row[0] if row else 0
+ gave_away_already = row[1] if row is not None else 0
+ if gave_away_already in (None, "None"):
+  gave_away_already = 0
+ text = (
+ "<b>🏆 ГЛОБАЛЬНЫЕ ДОСТИЖЕНИЯ</b>\n"
+ "<blockquote>Фильтр: Расширенный набор карт</blockquote>\n\n"
+ "Доступные опции:\n\n"
+ "<b>Тираж Финальных Боссов — 1 уровень</b>\n"
+ "<blockquote>Полная награда: 375 XP</blockquote>\n\n"
+ "<b>Тираж Троллфейсов — 2 уровня</b>\n"
+ "<blockquote>Полная награда: 700 XP</blockquote>\n\n"
+ "<b>Тираж .exe — 2 уровня</b>\n"
+ "<blockquote>Полная награда: 375 XP</blockquote>\n\n"
+ f"Выполнено: {completed_already}/5 \n"
+ f"Получено: {gave_away_already}/1450 XP\n\n"
+ "Выберите следующий фильтр для просмотра достижений конкретной карты"
+ )
+ await callback.message.edit_text(text=text, reply_markup=global_achievements_spacks.as_markup())
+ await callback.answer()
+
+@dp.callback_query(F.data == "global_achs_by_finalboss")
+async def demonstrating_global_achs_by_finalboss(callback: CallbackQuery):
+ await showing_global_achs_by_card(callback, "finalboss")
+
+@dp.callback_query(F.data == "global_achs_by_trollface")
+async def demonstrating_global_achs_by_trollface(callback: CallbackQuery):
+ await showing_global_achs_by_card(callback, "trollface")
+
+@dp.callback_query(F.data == "global_achs_by_.exe")
+async def demonstrating_global_achs_by_exe(callback: CallbackQuery):
+ await showing_global_achs_by_card(callback, "exe")
+
+@dp.callback_query(F.data == "global_achs_by_sigma")
+async def demonstrating_global_achs_by_sigma(callback: CallbackQuery):
+ await showing_global_achs_by_card(callback, "sigma")
+
+@dp.callback_query(F.data == "global_achs_by_diver")
+async def demonstrating_global_achs_by_diver(callback: CallbackQuery):
+ await showing_global_achs_by_card(callback, "diver")
+
+@dp.callback_query(F.data == "global_achs_by_sixseven")
+async def demonstrating_global_achs_by_sixseven(callback: CallbackQuery):
+ await showing_global_achs_by_card(callback, "sixseven")
+
+@dp.callback_query(F.data == "back_to_global_achs_main_menu")
+async def backing_to_main_menu_of_global_achievements(callback: CallbackQuery):
+ await handle_global_achievements(callback)
 
 @dp.message(Command("start")) # КОМАНДА ДЛЯ СТАРТА v0.1+
 async def showing_welcome_message(message: types.Message):
@@ -1225,9 +1337,9 @@ async def showing_welcome_message(message: types.Message):
  "<b>GitHub</b> — https://github.com/wheennn/Joe-Biden-Cards-Bot-RU\n\n"
  "Весь материал используется исключительно в <b>шуточных целях</b>.\n\n"
  "Чтобы начать игру, используйте команду /card\n\n"
- "Актуальная версия: v0.1.3.1"
+ "Актуальная версия: v0.1.4"
  )
- await message.answer(text)
+ await message.answer(text=text, disable_web_page_preview=True)
 
 @dp.message(Command("menu")) # КОМАНДА МЕНЮ v0.1+
 async def handle_answer(message: types.Message):
@@ -1253,22 +1365,8 @@ async def handle_answer(message: types.Message):
  cursor.execute("SELECT showing_prefixes FROM settings WHERE user_id = ?", (user_id,))
  row = cursor.fetchone()
  showing_prefixes = row[0] if row else 0
- cursor.execute("SELECT user_id FROM users WHERE user_id NOT IN (?, ?) ORDER BY xp DESC LIMIT 3",(dev_id, dev_mini_id))
- rows = cursor.fetchall()
- top_ids = [r[0] for r in rows]
- while len(top_ids) < 3:
-  top_ids.append(0)
- if showing_prefixes == 1:
-  if user_id in (dev_id, dev_mini_id):
-   status = "[DEV] "
-  elif user_id == top_ids[0]:
-   status = "[🥇] "
-  elif user_id == top_ids[1]:
-   status = "[🥈] "
-  elif user_id == top_ids[2]:
-   status = "[🥉] "
-  else:
-   status = ""
+ if showing_prefixes ==  1:
+  status = prefixes_selection(user_id)
  else:
   status = ""
  stage_progress = info[10] if info[7] == 1 else info[11] 
@@ -1291,33 +1389,30 @@ async def handle_answer(message: types.Message):
  for i in card_drop_diapazones.keys():
   if get_user_card_count(user_id, i) > 0:
    text += f"{card_names.get(i, "")} — x{get_user_card_count(user_id, i)}\n"
- if info[2] <= 9 and get_user_card_count(user_id, 6) == 0:
-  text += (
-   f"</blockquote>\nВсего: {info[3]} | {info[2]}/9 открыто\n"
-   f"Обычные наборы карт: {info[4]}\n"
-   f"Расширенные наборы карт: {info[5]}"
-  )
- elif info[2] <= 9 and get_user_card_count(user_id, 6) > 0:
-  text += (
-   f"</blockquote>\nВсего: {info[3]} | {info[2]}/10 открыто\n"
-   f"Обычные наборы карт: {info[4]}\n"
-   f"Расширенные наборы карт: {info[5]}"
+ how_much_is_needed = 10 if info[2] <= 10 and get_user_card_count(user_id, 6) == 0 else 11
+ text += (
+  f"</blockquote>\nВсего: {info[3]} | {info[2]}/{how_much_is_needed} открыто\n"
+  f"Обычные наборы карт: {info[4]}\n"
+  f"Расширенные наборы карт: {info[5]}\n"
+  f"Процент прохождения: {info[6]}%"
  )
- elif info[2] == 10 and get_user_card_count(user_id, 6) > 0:
-  text += (
-   f"</blockquote>\nВсего: {info[3]} | {info[2]}/10 открыто \n"
-   f"Обычные наборы карт: {info[4]}\n"
-   f"Расширенные наборы карт: {info[5]}"
-  )
- text += f"\nПроцент прохождения: {info[6]}%"
  await message.answer(text)
 
 @dp.message(Command("card")) # КОМАНДА ДЛЯ ОТКРЫТИЯ КАРТЫ v0.1+
+async def deciding_which_pack_to_show(message: types.Message):
+ user_id = message.from_user.id
+ cursor.execute("SELECT pack_stage FROM users WHERE user_id = ?", (user_id,))
+ row = cursor.fetchone()
+ stg = row[0] if row else 0
+ if stg == 1:
+  await handling_fpack_info(message)
+ elif stg == 2:
+  await handling_spack_info(message)
+ 
 async def handling_fpack_info(event: types.Message | types.CallbackQuery):
  user_id = event.from_user.id
  nickname = event.from_user.full_name
  username = event.from_user.username
- user_id = event.from_user.id
  cursor.execute(
     "INSERT OR IGNORE INTO settings (user_id, openings_per_time, showing_prefixes) VALUES (?, 1, 1)",
     (user_id,)
@@ -1330,12 +1425,14 @@ async def handling_fpack_info(event: types.Message | types.CallbackQuery):
  text = (
   "<b>Обычный Набор Карт с Джо Байденом</b>\n\n"
   "• Шансы:\n\n"
-  "Сигма Джо Байден — 1%\n"
-  "Водолаз Джо Байден — 4%\n"
-  "Сикс Севен Джо Байден — 10%\n"
-  "Праздничный Джо Байден — 30%\n"
-  "Обычный Джо Байден — 55%"
  )
+ fpack_cards = [5, 4, 3, 2, 1]
+ for i in card_drop_diapazones.keys():
+  if i in fpack_cards:
+   if get_user_card_count(user_id, i) >= 1:
+    text += f"{card_names.get(i, "Неизвестная карта")} — {card_chances.get(i, 0)}%\n"
+   else:
+    text += f"??? — {card_chances.get(i, 0)}%\n"
  card_pack_selection = InlineKeyboardBuilder() # Выбор действия при просмотре информации набора карт
  card_pack_selection.button(text="Открыть", callback_data="opening_fpack_method")
  card_pack_selection.button(text="Следующий набор", callback_data="next_pack")
@@ -1358,8 +1455,8 @@ async def opening_fpack(callback: CallbackQuery):
  fpacks = row[0] if row else 0
  card_pack_opening_selection = InlineKeyboardBuilder() # Выбор способа открытия набора карт
  if current_left > 0:
-  minutes = current_left // 60
-  seconds = current_left % 60
+  minutes = int(current_left // 60)
+  seconds = int(current_left % 60)
   card_pack_opening_selection.button(text=f"Бесплатно ({minutes}m {seconds}s)", callback_data="opening_fpack_through_cd")
  elif current_left <= 0:
   card_pack_opening_selection.button(text="Бесплатно", callback_data="opening_fpack_through_cd")
@@ -1381,8 +1478,8 @@ async def opening_fpack(callback: CallbackQuery):
  spacks = row[0] if row else 0
  card_pack_opening_selection = InlineKeyboardBuilder() # Выбор способа открытия набора карт
  if current_left > 0:
-  minutes = current_left // 60
-  seconds = current_left % 60
+  minutes = int(current_left // 60)
+  seconds = int(current_left % 60)
   card_pack_opening_selection.button(text=f"Бесплатно ({minutes}m {seconds}s)", callback_data="opening_spack_through_cd")
  elif current_left <= 0:
   card_pack_opening_selection.button(text="Бесплатно", callback_data="opening_spack_through_cd")
@@ -1429,10 +1526,10 @@ async def opening_spack_through_accumulations(callback: CallbackQuery):
   await callback.answer()
 
 @dp.callback_query(F.data == "next_pack")
-async def handling_spack_info(callback: CallbackQuery):
- user_id = callback.from_user.id
- nickname = callback.from_user.full_name
- username = callback.from_user.username
+async def handling_spack_info(event: types.Message | types.CallbackQuery):
+ user_id = event.from_user.id
+ nickname = event.from_user.full_name
+ username = event.from_user.username
  cursor.execute("INSERT OR IGNORE INTO users (user_id, full_name, username) VALUES (?, ?, ?)", (user_id, nickname or "Anon", username or "None")
  )
  cursor.execute("UPDATE users SET full_name = ?, username = ? WHERE user_id = ?", (nickname or "Anon", username or "Anon", user_id)
@@ -1444,18 +1541,24 @@ async def handling_spack_info(callback: CallbackQuery):
  text = (
   f"<b>{is_blocked}Расширенный Набор Карт с Джо Байденом</b>\n\n"
   "• Шансы:\n\n"
-  "Троллфейс Джо Байден — 5%\n"
-  "Джо Байден.exe — 10%\n"
-  "Джо Байден в Разрешении 38:9 — 30%\n"
-  "Джо Байден в Разрешении 9:38 — 55%"
  )
+ spack_cards = [11, 10, 9, 8, 7]
+ for i in card_drop_diapazones.keys():
+  if i in spack_cards:
+   if get_user_card_count(user_id, i) >= 1:
+    text += f"{card_names.get(i, "Неизвестная карта")} — {card_chances.get(i, 0)}%\n"
+   else:
+    text += f"??? — {card_chances.get(i, 0)}%\n"
  card_pack_selection = InlineKeyboardBuilder() # Выбор действия при просмотре информации набора карт
  if stg >= 2:
   card_pack_selection.button(text="Открыть", callback_data="opening_spack_method")
  card_pack_selection.button(text="Предыдущий набор", callback_data="prev_pack")
  card_pack_selection.adjust(1)
- await callback.message.edit_text(text=text, reply_markup=card_pack_selection.as_markup())
- await callback.answer()
+ if isinstance (event, types.Message):
+  await event.answer(text=text, reply_markup=card_pack_selection.as_markup())
+ elif isinstance (event, CallbackQuery):
+  await event.message.edit_text(text=text, reply_markup=card_pack_selection.as_markup())
+  await event.answer()
 
 @dp.callback_query(F.data == "prev_pack")
 async def previous_pack(callback: CallbackQuery):
@@ -1473,6 +1576,18 @@ async def reminder(): # СИСТЕМА НАПОМИНАНИЙ v0.1.1+
    db.commit()
    cursor.execute("SELECT reminder_cd, reminder_2, reminder_8, reminder_24 FROM reminder_spam WHERE user_id = ?", (user_id,))
    row = cursor.fetchone()
+   cursor.execute("SELECT pack_stage FROM users WHERE user_id = ?", (user_id,))
+   res = cursor.fetchone()
+   stg = row[0] if row else 0
+   pack_name = "обычного набора карточек" if stg == 1 else "расширенного набора карточек"
+   cd_first = 1800 if stg == 1 else 3600
+   card2441 = "Водолаза" if stg == 1 else "Троллфейса"
+   card2442 = "Сигму" if stg == 1 else "Финального Босса"
+   card_slogan244 = "Не хочешь оказаться на дне как Водолаз?" if stg == 1 else "Не хочешь оказаться в банкротстве как Троллфейс?"
+   card245 = "Сигма Джо Байден" if stg == 1 else "Финальный Босс Джо Байден"
+   card83 = "Сигма" if stg == 1 else "Финальный Босс"
+   card231 = "Сикс Севен Джо" if stg == 1 else "Джо.exe"
+   card232 = "Сигмой" if stg == 1 else "Финальным Боссом"
    if not row:
     continue
    await asyncio.sleep(0.1) 
@@ -1492,9 +1607,9 @@ async def reminder(): # СИСТЕМА НАПОМИНАНИЙ v0.1.1+
      elif random_reminder == 3:
       text = "😢 <b>Джо Байден соскучился по тебе</b>.. Ты не открывал наборы с карточками уже почти 24 часа. У тебя что-то случилось?\n\nЕсли не хочешь расстроить Джо Байдена еще больше, нажми /card чтобы открыть набор карточек"
      elif random_reminder == 4:
-      text = "Хочешь получить хотя-бы <b>Водолаза</b> или даже <b>Сигму</b>? Так делай хоть что-то, а то с момента твоего последнего открытия прошёл уже целый день!\n\n<b>Не хочешь оказаться на дне как Водолаз</b>? Заходи и открывай набор с карточками через /card"
+      text = f"Хочешь получить хотя-бы <b>{card2441}</b> или даже <b>{card2442}</b>? Так делай хоть что-то, а то с момента твоего последнего открытия прошёл уже целый день!\n\n<b>{card_slogan244}</b>? Заходи и открывай набор с карточками через /card"
      elif random_reminder == 5:
-      text = "Знаешь, <b>Сигма Джо Байден</b> ведь тоже не сразу стал таким крутым, <b>он достиг этого самостоятельно</b>. А вот ты — лентяй! Иди и открывай карточку, если хочешь достичь хоть чего-то!\n\nНажми /card для открытия"
+      text = f"Знаешь, <b>{card245}</b> ведь тоже не сразу стал таким крутым, <b>он достиг этого самостоятельно</b>. А вот ты — лентяй! Иди и открывай карточку, если хочешь достичь хоть чего-то!\n\nНажми /card для открытия"
      await bot.send_message(chat_id=user_id, text=text)
      cursor.execute("UPDATE reminder_spam SET reminder_24 = ? WHERE user_id = ?", (time.time(), user_id))
      db.commit()
@@ -1505,7 +1620,7 @@ async def reminder(): # СИСТЕМА НАПОМИНАНИЙ v0.1.1+
      elif random_reminder == 2:
       text = "🙄 Хорошо. Я <b>пытался заинтересовать тебя</b>, дать шанс.. Но раз ты не открываешь карточки уже 8 часов, что ж поделаешь!\n\nВдруг захочешь исправиться - нажми команду /card"
      elif random_reminder == 3:
-      text = "😡 Ах ты проказник вот такой! Не заходишь в бота уже 8 часов, значит <b>плакал за тобой Сигма</b>! Не быть тебе топ 1 мира с такой дисциплиной.\n\nНажми /card чтобы открыть набор карточек"
+      text = f"😡 Ах ты проказник вот такой! Не заходишь в бота уже 8 часов, значит <b>плакал за тобой {card83}</b>! Не быть тебе топ 1 мира с такой дисциплиной.\n\nНажми /card чтобы открыть набор карточек"
      elif random_reminder == 4:
       text = "Легенда гласит — <b>если прямо сейчас откроешь набор, тебе выпадет твоя заветная карточка</b>. Я ведь мудрец — а мудрецы не ошибаются.\n\nВдруг тебе и правда повезет? Просто нажми /card"
      elif random_reminder == 5:
@@ -1520,18 +1635,18 @@ async def reminder(): # СИСТЕМА НАПОМИНАНИЙ v0.1.1+
      elif random_reminder == 2:
       text = "📈 Твои <b>конкуренты уже лутают опыт во всю</b>, а ты что?\n\nНажми /card и компенсируй утерянное"
      elif random_reminder == 3:
-      text = "😉 Раз ты хочешь получить хотя бы <b>Сикс Севен Джо</b>, лучше не забывай открывать карточки. А там, вдруг ты захочешь <b>поохотиться за Сигмой и топ 1 мира</b>.\n\nНажми /card чтобы открыть набор карточек"
+      text = f"😉 Раз ты хочешь получить хотя бы <b>{card231}</b>, лучше не забывай открывать карточки. А там, вдруг ты захочешь <b>поохотиться за {card232} и топ 1 мира</b>.\n\nНажми /card чтобы открыть набор карточек"
      elif random_reminder == 4:
       text = "⌛ Часики тикают, а <b>твои шансы достичь топа всё уменьшаются</b>!\n\nНажми /card и компенсируй утерянное"
      await bot.send_message(chat_id=user_id, text=text)
      cursor.execute("UPDATE reminder_spam SET reminder_2 = ? WHERE user_id = ?", (time.time(), user_id))
      db.commit()
-    elif 1800 <= diff < 7200 and reminder_cd == 0:
+    elif cd_first <= diff < 7200 and reminder_cd == 0:
      random_reminder = random.randint(1, 2)
      if random_reminder == 1:
-      text = "⏱️ КД обычного набора карточек закончился! Нажмите /card для открытия"
+      text = f"⏱️ КД {pack_name} закончился! Нажмите /card для открытия"
      elif random_reminder == 2:
-      text = "⏱️ Пришло время выбивать новых Джо Байденов — КД обычного набора карточек закончился! Используй /card для открытия"
+      text = f"⏱️ Пришло время выбивать новых Джо Байденов — КД {pack_name} закончился! Используй /card для открытия"
      await bot.send_message(chat_id=user_id, text=text)
      cursor.execute("UPDATE reminder_spam SET reminder_cd = ? WHERE user_id = ?", (time.time(), user_id))
      db.commit()
@@ -1541,21 +1656,25 @@ async def reminder(): # СИСТЕМА НАПОМИНАНИЙ v0.1.1+
   await asyncio.sleep(unique_time_check)
 
 @dp.message(Command("settings")) # КОМАНДА НАСТРОЕК v0.1.3+
-async def showing_and_setting_up_settings(message: types.Message):
- user_id = message.from_user.id 
+async def showing_and_setting_up_settings(event: types.Message | types.CallbackQuery):
+ user_id = event.from_user.id 
  cursor.execute("INSERT OR IGNORE INTO settings (user_id) VALUES (?)", (user_id,))
  db.commit()
- cursor.execute("SELECT openings_per_time, showing_prefixes FROM settings WHERE user_id = ?", (user_id,))
+ cursor.execute("SELECT openings_per_time, showing_prefixes, showing_my_profile FROM settings WHERE user_id = ?", (user_id,))
  row = cursor.fetchone()
  opening_per_time = row[0]
  showing_prefixes = row[1]
+ showing_my_tg_profile = row[2]
  showing_prefixes = "On" if showing_prefixes == 1 else "Off"
+ showing_my_tg_profile = "On" if showing_my_tg_profile == 1 else "Off"
  text = (
   "⚙️ <b>НАСТРОЙКИ</b>\n\n"
   f"Открытие карт за раз — {opening_per_time}\n"
   "<blockquote>Количество карт которые открываются за одно нажатие при распаковке из запасов</blockquote>\n\n"
   f"Отображение префиксов — {showing_prefixes}\n"
   "<blockquote>Отображение уникальных префиксов в вашем или чужом профиле</blockquote>\n\n"
+  f"Отображение моего профиля — {showing_my_tg_profile}\n"
+  "<blockquote>Отображение ссылки на ваш TG-профиль в лидерборде</blockquote>\n\n"
   "Контрибьюторы\n"
   "<blockquote>Люди, сделавшие вклад в развитие проекта</blockquote>\n\n"
   "В течение будущих обновлений кастомные функции и настройки будут добавлятся."
@@ -1563,62 +1682,74 @@ async def showing_and_setting_up_settings(message: types.Message):
  settings = InlineKeyboardBuilder() # Выбор действия в настройках
  settings.button(text="Открытие карт за раз", callback_data="opening_per_time")
  settings.button(text="Отображение префиксов", callback_data="showing_prefixes")
+ settings.button(text="Отображение моего профиля", callback_data="showing_my_profile")
  settings.button(text="Контрибьюторы", callback_data="contributors")
  settings.adjust(1)
- await message.answer(text=text, reply_markup=settings.as_markup())
+ if isinstance (event, types.Message):
+  await event.answer(text=text, reply_markup=settings.as_markup())
+ elif isinstance (event, types.CallbackQuery):
+  await event.message.edit_text(text=text, reply_markup=settings.as_markup())
+  await event.answer()
 
 @dp.callback_query(F.data == "opening_per_time")
-async def opening_per_time_setting(callback: CallbackQuery):
+async def opening_per_time_setting_message(callback: CallbackQuery):
  text = "Выберите количество наборов карт которое вы хотите открывать за раз"
  opening_per_time = InlineKeyboardBuilder() # Выбор желанного количества наборов карт которые будут открыты за раз
  opening_per_time.button(text="1", callback_data="opening_one_per_time")
  opening_per_time.button(text="2", callback_data="opening_two_per_time")
  opening_per_time.button(text="3", callback_data="opening_three_per_time")
+ opening_per_time.button(text="5", callback_data="opening_five_per_time")
+ opening_per_time.button(text="Назад", callback_data="back_to_settings")
+ opening_per_time.adjust(4, 1)
  await callback.message.edit_text(text=text, reply_markup=opening_per_time.as_markup())
  await callback.answer()
 
 @dp.callback_query(F.data == "opening_one_per_time")
 async def opening_one_per_time(callback: CallbackQuery):
- user_id = callback.from_user.id
- cursor.execute("UPDATE settings SET openings_per_time = 1 WHERE user_id = ?", (user_id,))
- db.commit()
- text = "Вы успешно изменили эту настройку. Теперь при открытии наборов из запасов вы всегда будете открывать по 1 карте за раз."
- await callback.message.answer(text)
- await callback.answer()
+ await opening_per_time_setting(callback, 1)
  
 @dp.callback_query(F.data == "opening_two_per_time")
 async def opening_two_per_time(callback: CallbackQuery):
- user_id = callback.from_user.id
- cursor.execute("UPDATE settings SET openings_per_time = 2 WHERE user_id = ?", (user_id,))
- db.commit()
- text = "Вы успешно изменили эту настройку. Теперь при открытии наборов из запасов вы всегда будете открывать по 2 карты за раз."
- await callback.message.answer(text)
- await callback.answer()
+ await opening_per_time_setting(callback, 2)
 
 @dp.callback_query(F.data == "opening_three_per_time")
 async def opening_three_per_time(callback: CallbackQuery):
- user_id = callback.from_user.id
- cursor.execute("UPDATE settings SET openings_per_time = 3 WHERE user_id = ?", (user_id,))
- db.commit()
- text = "Вы успешно изменили эту настройку. Теперь при открытии наборов из запасов вы всегда будете открывать по 3 карты за раз."
- await callback.message.answer(text)
- await callback.answer()
+ await opening_per_time_setting(callback, 3)
+
+@dp.callback_query(F.data == "opening_five_per_time")
+async def opening_five_per_time(callback: CallbackQuery):
+ await opening_per_time_setting(callback, 5)
 
 @dp.callback_query(F.data == "showing_prefixes")
 async def showing_prefixes_setting(callback: CallbackQuery):
  user_id = callback.from_user.id
  cursor.execute("SELECT showing_prefixes FROM settings WHERE user_id = ?", (user_id,))
  showing_prefixes = cursor.fetchone()[0]
- if showing_prefixes == 1:
-  cursor.execute("UPDATE settings SET showing_prefixes = 0 WHERE user_id = ?", (user_id,))
-  text = "Вы успешно изменили эту настройку. Теперь вам не будут видны особые префиксы перед никами игроков."
- elif showing_prefixes == 0:
-  cursor.execute("UPDATE settings SET showing_prefixes = 1 WHERE user_id = ?", (user_id,))
-  text = "Вы успешно изменили эту настройку. Теперь вам будут видны особые префиксы перед никами игроков."
- await callback.message.answer(text)
- await callback.answer()
+ budut_ili_net = "не будут" if showing_prefixes == 1 else "будут"
+ change_to_what = 0 if showing_prefixes == 1 else 1
+ cursor.execute("UPDATE settings SET showing_prefixes = ? WHERE user_id = ?", (change_to_what, user_id))
  db.commit()
+ text = f"Вы успешно изменили эту настройку. Теперь вам {budut_ili_net} отображаться уникальные префиксы игроков."
+ showing_prefixes = InlineKeyboardBuilder() 
+ showing_prefixes.button(text="Назад", callback_data="back_to_settings")
+ await callback.message.edit_text(text=text, reply_markup=showing_prefixes.as_markup())
+ await callback.answer()
 
+@dp.callback_query(F.data == "showing_my_profile")
+async def showing_my_tg_profile_setting(callback: CallbackQuery):
+ user_id = callback.from_user.id
+ cursor.execute("SELECT showing_my_profile FROM settings WHERE user_id = ?", (user_id,))
+ showing_my_tg_profile = cursor.fetchone()[0]
+ budet_ili_net = "не будет" if showing_my_tg_profile == 1 else "будет"
+ change_to_what = 0 if showing_my_tg_profile == 1 else 1
+ cursor.execute("UPDATE settings SET showing_my_profile = ? WHERE user_id = ?", (change_to_what, user_id))
+ db.commit()
+ text = f"Вы успешно изменили эту настройку. Теперь ссылка на ваш профиль {budet_ili_net} отображаться в лидерборде."
+ showing_my_profile = InlineKeyboardBuilder() 
+ showing_my_profile.button(text="Назад", callback_data="back_to_settings")
+ await callback.message.edit_text(text=text, reply_markup=showing_my_profile.as_markup())
+ await callback.answer()
+ 
 @dp.callback_query(F.data == "contributors")
 async def showing_contributors(callback: CallbackQuery):
  text = (
@@ -1626,8 +1757,14 @@ async def showing_contributors(callback: CallbackQuery):
   "@take_me_back_to_august — дизайн для Обычного и Праздничного Джо Байденов\n"
   "@Subarash_ii — хостинг бота и поддержка работы сервера"
  )
- await callback.message.answer(text)
+ contributors = InlineKeyboardBuilder() 
+ contributors.button(text="Назад", callback_data="back_to_settings")
+ await callback.message.edit_text(text=text, reply_markup=contributors.as_markup())
  await callback.answer()
+
+@dp.callback_query(F.data == "back_to_settings")
+async def back_to_settings_menu(callback: CallbackQuery):
+ await showing_and_setting_up_settings(callback)
 
 @dp.message(Command("profile")) # КОМАНДА ДЛЯ ПРОСМОТРА ЧУЖОГО ПРОФИЛЯ v0.1.2+
 async def showing_someones_profile(message: types.Message):
@@ -1671,17 +1808,8 @@ async def showing_someones_profile(message: types.Message):
   cursor.execute("SELECT showing_prefixes FROM settings WHERE user_id = ?", (user_id,))
   row = cursor.fetchone()
   showing_prefixes = row[0] if row else 0
-  if showing_prefixes == 1:
-   if arg_id in (dev_id, dev_mini_id):
-    status = "[DEV] "
-   elif arg_id == top_ids[0]:
-    status = "[🥇] "
-   elif arg_id == top_ids[1]:
-    status = "[🥈] "
-   elif arg_id == top_ids[2]:
-    status = "[🥉] "
-   else:
-    status = ""
+  if showing_prefixes ==  1:
+   status = prefixes_selection(arg_id)
   else:
    status = ""
   stage_progress = info[10] if info[7] == 1 else info[11] 
@@ -1704,21 +1832,21 @@ async def showing_someones_profile(message: types.Message):
   for i in card_drop_diapazones.keys():
    if get_user_card_count(arg_id, i) > 0:
     text += f"{card_names.get(i, "")} — x{get_user_card_count(arg_id, i)}\n"
-  if info[2] <= 9 and get_user_card_count(arg_id, 6) == 0:
-   text += (
-    f"</blockquote>\nВсего: {info[3]} | {info[2]}/9 открыто\n"
-    f"Обычные наборы карт: {info[4]}\n"
-    f"Расширенные наборы карт: {info[5]}"
-   )
-  elif info[2] <= 9 and get_user_card_count(arg_id, 6) > 0:
+  if info[2] <= full_coll and get_user_card_count(arg_id, 6) == 0:
    text += (
     f"</blockquote>\nВсего: {info[3]} | {info[2]}/10 открыто\n"
     f"Обычные наборы карт: {info[4]}\n"
     f"Расширенные наборы карт: {info[5]}"
-  )
-  elif info[2] == 10 and get_user_card_count(arg_id, 6) > 0:
+   )
+  elif info[2] <= full_coll and get_user_card_count(arg_id, 6) > 0:
    text += (
-    f"</blockquote>\nВсего: {info[3]} | {info[2]}/10 открыто \n"
+    f"</blockquote>\nВсего: {info[3]} | {info[2]}/11 открыто\n"
+    f"Обычные наборы карт: {info[4]}\n"
+    f"Расширенные наборы карт: {info[5]}"
+  )
+  elif info[2] == full_coll + 1 and get_user_card_count(arg_id, 6) > 0:
+   text += (
+    f"</blockquote>\nВсего: {info[3]} | {info[2]}/11 открыто \n"
     f"Обычные наборы карт: {info[4]}\n"
     f"Расширенные наборы карт: {info[5]}"
    )
@@ -1727,6 +1855,11 @@ async def showing_someones_profile(message: types.Message):
   waiting_users.discard(user_id)
 
 async def main():
+ cursor.execute("SELECT xp FROM users WHERE user_id = ?", (dev_id,))
+ row = cursor.fetchone()
+ xp = row[0] if row else 0
+ if int(time.time()) <= 1782464400 and xp == 271:
+  await setup_v0_1_4()
  asyncio.create_task(reminder())
  asyncio.create_task(season_dispatcher())
  asyncio.create_task(global_rewards_dispatcher())
@@ -1737,4 +1870,3 @@ if __name__ == "__main__":
   asyncio.run(main())
  except KeyboardInterrupt:
   print("Бот выключен")
-  print("67")
