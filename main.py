@@ -527,6 +527,9 @@ def url_tg_profile_request(name: str):
  print(f"name: {name}, username: {username}, id: {id}, show: {"on" if show == 1 else "off"}, link start: {link_start}, link end: {link_end}\n")
  return link_start, link_end
 
+cursor.execute("UPDATE users SET pack_stage = 1 WHERE total_cards = 0")
+db.commit()
+
 async def setup_v_0_1_4_1():
  cursor.execute('UPDATE card_stats SET first_unlocked = "𔓕 ࣪⊹ ◜⛩️◞ ︎ִ ꩜ すばらしい ꩜ ◜🪽◞ ︎ִ`⌁ ࣪" WHERE card_id = 10')
  db.commit()
@@ -1249,7 +1252,7 @@ async def showing_welcome_message(message: types.Message):
  nickname = message.from_user.full_name
  user_id = message.from_user.id
  username = message.from_user.username
- cursor.execute("INSERT OR IGNORE INTO users (user_id, full_name, username) VALUES (?, ?, ?)", (user_id, nickname or "Anon", username or "None"))
+ cursor.execute("INSERT OR IGNORE INTO users (user_id, full_name, username, pack_stage) VALUES (?, ?, ?, ?)", (user_id, nickname or "Anon", username or "None", 1))
  cursor.execute("UPDATE users SET full_name = ?, username = ? WHERE user_id = ?", (nickname or "Anon", username or "Anon", user_id))
  db.commit()
  text = (
@@ -1274,7 +1277,7 @@ async def handle_answer(message: types.Message):
     "INSERT OR IGNORE INTO settings (user_id, openings_per_time, showing_prefixes) VALUES (?, 1, 1)",
     (user_id,)
  )
- cursor.execute("INSERT OR IGNORE INTO users (user_id, full_name, username) VALUES (?, ?, ?)", (user_id, nickname or "Anon", username or "None"))
+ cursor.execute("INSERT OR IGNORE INTO users (user_id, full_name, username, pack_stage) VALUES (?, ?, ?, ?)", (user_id, nickname or "Anon", username or "None", 1))
  cursor.execute("UPDATE users SET full_name = ?, username = ? WHERE user_id = ?", (nickname or "Anon", username or "Anon", user_id))
  db.commit()
  cursor.execute("SELECT full_name, xp, unlocked_cards, total_cards, fpacks, spacks, total_progress, pack_stage, fpack_unlocked_cards, spack_unlocked_cards, fpack_progress, spack_progress FROM users WHERE user_id = ?", (user_id,))
